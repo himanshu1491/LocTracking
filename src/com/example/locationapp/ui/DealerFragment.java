@@ -17,12 +17,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.adapter.DealerAdapter;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.data.Dealer.DealerState;
 
 public class DealerFragment extends Fragment implements OnItemClickListener
 {
@@ -70,8 +72,14 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 	{
 		Log.d("DeviceFragment", "Item Pressed" + position);
 
-		((LocationActivity) getActivity()).attachPodFragment(dealerData.get(position).getId());
-
+		if (dealerData.get(position).getState() == DealerState.POD_COLLECTED)
+		{
+			Toast.makeText(getActivity(), "POD has already been collected", Toast.LENGTH_LONG).show();
+		}
+		else
+		{
+			((LocationActivity) getActivity()).attachPodFragment(dealerData.get(position).getId());
+		}
 	}
 
 	private BroadcastReceiver mRefreshDealerData = new BroadcastReceiver()

@@ -18,6 +18,8 @@ import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.Utils.Utils;
+import com.example.locationapp.data.Dealer;
+import com.example.locationapp.data.Dealer.DealerState;
 import com.example.locationapp.http.UploadPhotoTask;
 
 public class PODFragment extends Fragment implements OnClickListener
@@ -74,7 +76,7 @@ public class PODFragment extends Fragment implements OnClickListener
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
 			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, dealerId);
-			startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
+			getActivity().startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
 			break;
 		case R.id.HalfPod:
 
@@ -85,7 +87,7 @@ public class PODFragment extends Fragment implements OnClickListener
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
 			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, dealerId);
-			startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
+			getActivity().startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
 			break;
 		}
 	}
@@ -108,6 +110,14 @@ public class PODFragment extends Fragment implements OnClickListener
 					Utils.compressImage(filePath, destinationFile.toString());
 					file.delete();
 					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask());
+					String dealerId = prefs.getData(Constants.DEALER_ID_UPLOAD_POD, "");
+					Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
+					if (dealer != null)
+					{
+						dealer.setState(DealerState.POD_COLLECTED);
+						LocationApp.getInstance().putDealerDetailsInMap(dealer);
+					}
+
 				}
 			}
 		}

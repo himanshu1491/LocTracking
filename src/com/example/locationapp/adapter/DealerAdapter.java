@@ -68,6 +68,7 @@ public class DealerAdapter extends BaseAdapter
 		}
 
 		holder.name.setText(dealerData.get(position).getName());
+		holder.counter.setText(position + 1 + "");
 
 		switch (dealerData.get(position).getState())
 		{
@@ -80,7 +81,6 @@ public class DealerAdapter extends BaseAdapter
 		case DealerState.POD_COLLECTED:
 			holder.imgView.setBackground(context.getDrawable(R.drawable.green));
 			break;
-		
 
 		}
 		return convertView;
