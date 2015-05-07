@@ -22,6 +22,16 @@ import com.example.locationapp.http.StringLocEntity.ProgressListener;
 public class UploadPhotoTask implements Runnable, ProgressListener
 {
 
+	String dealerId;
+	
+	String filePath;
+
+	public UploadPhotoTask(String dealerId,String filePath)
+	{
+		this.dealerId = dealerId;
+		this.filePath=filePath;
+	}
+
 	@Override
 	public void run()
 	{
@@ -33,14 +43,15 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 		final Long startTime = System.currentTimeMillis();
 		try
 		{
-			File file = new File(LocationSharedPreference.getInstance().getData(Constants.FILE_PATH_CAMERA_COMPRESS, ""));
+			File file = new File(filePath);
 			Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 			byte[] arr = Utils.bitmapToBytes(bitmap, CompressFormat.JPEG, 75);
 			String encodedImage = Base64.encodeToString(arr, Base64.DEFAULT);
 			JSONObject body = new JSONObject();
-			body.put("dealerId", encodedImage);
+			body.put("dealerId", dealerId);
+			body.put("img", encodedImage);
 			StringLocEntity entity = new StringLocEntity(body.toString(), this);
-			String URL = Constants.HTTP_STRING + Constants.DEV_STAGING_HOST + Constants.URL_GCM;
+			String URL = Constants.HTTP_STRING + Constants.DEV_STAGING_HOST + Constants.UPLOAD_PHOTO;
 
 			RequestParams params = new RequestBuilder().AddToken(true).setEntity(entity).setUrl(URL).build();
 			HTTPManager.post(params, new IResponse()

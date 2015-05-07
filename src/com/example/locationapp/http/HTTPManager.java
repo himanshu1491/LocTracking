@@ -25,6 +25,7 @@ public class HTTPManager
 		post.setHeader("Content-type", "application/json");
 		HttpResponse res = null;
 
+		Log.d("HTTP", "GOING TO EXECUTE " + params.getUrl());
 		if (params.isAddToken())
 		{
 			addToken(post);
@@ -40,15 +41,17 @@ public class HTTPManager
 			}
 
 			response.onSuccess(EntityUtils.toString(res.getEntity()));
+			Log.d("HTTP", "SUCESS " + EntityUtils.toString(res.getEntity()));
 		}
 		catch (ClientProtocolException e)
 		{
-			// TODO Auto-generated catch block
+			Log.d("HTTP", "Failed " + e);
 			e.printStackTrace();
 			response.onFailure(1);
 		}
 		catch (IOException e)
 		{
+			Log.d("HTTP", "Failed " + e);
 			response.onFailure(1);
 			e.printStackTrace();
 		}

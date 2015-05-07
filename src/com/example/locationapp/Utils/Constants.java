@@ -25,6 +25,8 @@ public class Constants
 	public static final String URL_GCM = "/generateToken";
 
 	public static final String UPDATE_LOC = "/updateLocation";
+	
+	public static final String URL_NOTIFY_DEALER = "/notifyDealer";
 
 	public static final int MAX_DIMENSION_MEDIUM_FULL_SIZE_PX = 800;
 
@@ -34,7 +36,7 @@ public class Constants
 
 	public static final String DEALER_ID_UPLOAD_POD = "dealer_id_pod";
 
-	public static final String UPLOAD_PHOTO = "/uploadTask";
+	public static final String UPLOAD_PHOTO = "/photoupload";
 
 	public static final String TOKEN = "token";
 
@@ -53,5 +55,6 @@ public class Constants
 	public static final String START_TRACKING = "startTracking";
 
 	public static final String REFRESH_DEALER_DATA = "refresh_dealer_data";
+	
 
 }

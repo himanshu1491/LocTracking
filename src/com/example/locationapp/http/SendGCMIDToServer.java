@@ -49,6 +49,15 @@ public class SendGCMIDToServer implements Runnable
 				public void onSuccess(String response)
 				{
 					Log.d("GCMIDTOSERVER", response);
+					try
+					{
+						JSONObject object = new JSONObject(response);
+						LocationSharedPreference.getInstance().saveData(Constants.TOKEN, object.optString(Constants.TOKEN, ""));
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
 					pref.saveData(Constants.SENDTOSERVER, true);
 				}
 

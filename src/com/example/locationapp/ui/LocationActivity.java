@@ -38,16 +38,32 @@ public class LocationActivity extends ActionBarActivity
 		actionBar.setLogo(R.drawable.ic_launcher);
 		actionBar.setDisplayUseLogoEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
+		
 		initFragment();
 	}
 
-	@Override
-	protected void onResume()
+	public void shouldDisplayHomeUp()
 	{
-		super.onResume();
-
+		// Enable Up button only if there are entries in the back stack
+		boolean canback = getSupportFragmentManager().getBackStackEntryCount() > 0;
+		getSupportActionBar().setDisplayHomeAsUpEnabled(canback);
 	}
 
+	@Override
+	public boolean onSupportNavigateUp()
+	{
+		// This method is called when the up button is pressed. Just the pop back stack.
+		getSupportFragmentManager().popBackStack();
+		return true;
+	}
+
+	public void enableUpButton(boolean enable)
+	{
+		getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
+	}
+	
+	
+	
 	private void initFragment()
 	{
 		FragmentManager fm = getSupportFragmentManager();
@@ -68,7 +84,7 @@ public class LocationActivity extends ActionBarActivity
 		{
 			ft.replace(R.id.container, dealerFragment, DealerFragment.class.getName()).commitAllowingStateLoss();
 		}
-		Utils.registerGCMID(this);
+		// Utils.registerGCMID(this);
 	}
 
 	@Override
@@ -101,8 +117,9 @@ public class LocationActivity extends ActionBarActivity
 					prefs.saveData(Constants.FILE_PATH_CAMERA_COMPRESS, destinationFile.toString());
 					Utils.compressImage(filePath, destinationFile.toString());
 					file.delete();
-					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask());
+
 					String dealerId = prefs.getData(Constants.DEALER_ID_UPLOAD_POD, "");
+					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(dealerId, destinationFile.toString()));
 					Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
 					if (dealer != null)
 					{
@@ -150,6 +167,7 @@ public class LocationActivity extends ActionBarActivity
 		{
 			ft.replace(R.id.container, podFragment, PODFragment.class.getName()).commit();
 		}
+		shouldDisplayHomeUp();
 	}
 
 }

@@ -2,7 +2,6 @@ package com.example.locationapp.ui;
 
 import java.io.File;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,11 +15,7 @@ import android.widget.Toast;
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
-import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.Utils.Utils;
-import com.example.locationapp.data.Dealer;
-import com.example.locationapp.data.Dealer.DealerState;
-import com.example.locationapp.http.UploadPhotoTask;
 
 public class PODFragment extends Fragment implements OnClickListener
 {
@@ -49,8 +44,13 @@ public class PODFragment extends Fragment implements OnClickListener
 		dealerId = getArguments().getString("dealerId");
 		bindViews();
 		listeners();
+		LocationActivity activity=(LocationActivity) getActivity();
+		activity.enableUpButton(true);
+		
 	}
 
+	
+	
 	private void bindViews()
 	{
 		halfPodButton = (Button) getView().findViewById(R.id.HalfPod);
@@ -95,34 +95,7 @@ public class PODFragment extends Fragment implements OnClickListener
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		if (requestCode == Constants.REQUESTCODE_CAMERA && resultCode == Activity.RESULT_OK)
-		{
-			String filePath = prefs.getData(Constants.FILE_PATH_CAMERA, null);
-			prefs.removeData(Constants.FILE_PATH_CAMERA);
-			if (filePath != null)
-			{
-				File file = new File(filePath);
-
-				if ((file != null) && (file.exists()))
-				{
-					File destinationFile = Utils.createNewFile("cam_compress");
-					prefs.saveData(Constants.FILE_PATH_CAMERA_COMPRESS, destinationFile.toString());
-					Utils.compressImage(filePath, destinationFile.toString());
-					file.delete();
-					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask());
-					String dealerId = prefs.getData(Constants.DEALER_ID_UPLOAD_POD, "");
-					Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
-					if (dealer != null)
-					{
-						dealer.setState(DealerState.POD_COLLECTED);
-						LocationApp.getInstance().putDealerDetailsInMap(dealer);
-					}
-
-				}
-			}
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-		getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+		
 	}
 
 }

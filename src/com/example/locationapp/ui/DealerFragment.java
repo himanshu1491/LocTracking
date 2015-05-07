@@ -54,6 +54,8 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 		bindListeners();
 		adapter = new DealerAdapter(getActivity(), dealerData);
 		listView.setAdapter(adapter);
+		LocationActivity activity=(LocationActivity) getActivity();
+		activity.enableUpButton(false);
 
 	}
 
