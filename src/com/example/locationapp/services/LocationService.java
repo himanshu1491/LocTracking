@@ -62,6 +62,12 @@ public class LocationService extends Service implements ILocationCallback
 		mGeoFenceManager = GeoFenceManager.getInstance();
 		gpsTracker = GPSTracker.getInstance();
 		gpsTracker.addListener(this);
+		String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
+
+		if (!TextUtils.isEmpty(dealerdetails))
+		{
+			gpsTracker.startTracking();
+		}
 	}
 
 	private void startTracking()
@@ -139,6 +145,7 @@ public class LocationService extends Service implements ILocationCallback
 		{
 			LocationSharedPreference.getInstance().saveData(Constants.DEALER_DETAILS, intent.getStringExtra("message"));
 			LocationApp.getInstance().clearDealerData();
+			mGeoFenceManager.removeAllGeofence();
 			gpsTracker.stopTracking();
 			LocationApp.getInstance().fillDealerMap();
 			context.sendBroadcast(new Intent(Constants.REFRESH_DEALER_DATA));

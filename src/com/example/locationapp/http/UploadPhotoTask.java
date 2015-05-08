@@ -25,11 +25,15 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 	String dealerId;
 	
 	String filePath;
+	
+	String PodType;
+	
 
-	public UploadPhotoTask(String dealerId,String filePath)
+	public UploadPhotoTask( String PodType,String dealerId,String filePath)
 	{
 		this.dealerId = dealerId;
 		this.filePath=filePath;
+		this.PodType=PodType;
 	}
 
 	@Override
@@ -48,8 +52,9 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 			byte[] arr = Utils.bitmapToBytes(bitmap, CompressFormat.JPEG, 75);
 			String encodedImage = Base64.encodeToString(arr, Base64.DEFAULT);
 			JSONObject body = new JSONObject();
-			body.put("dealerId", dealerId);
+			body.put(Constants.DEALER_ID, dealerId);
 			body.put("img", encodedImage);
+			body.put(Constants.POD_TYPE, PodType);
 			StringLocEntity entity = new StringLocEntity(body.toString(), this);
 			String URL = Constants.HTTP_STRING + Constants.DEV_STAGING_HOST + Constants.UPLOAD_PHOTO;
 

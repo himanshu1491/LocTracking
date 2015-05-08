@@ -2,6 +2,9 @@ package com.example.locationapp.ui;
 
 import java.io.File;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.Constants.PODTYPE;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
 
@@ -27,6 +31,8 @@ public class PODFragment extends Fragment implements OnClickListener
 	File file = null;
 
 	String dealerId;
+
+	JSONObject data = null;
 
 	LocationSharedPreference prefs = LocationSharedPreference.getInstance();
 
@@ -44,13 +50,11 @@ public class PODFragment extends Fragment implements OnClickListener
 		dealerId = getArguments().getString("dealerId");
 		bindViews();
 		listeners();
-		LocationActivity activity=(LocationActivity) getActivity();
+		LocationActivity activity = (LocationActivity) getActivity();
 		activity.enableUpButton(true);
-		
+
 	}
 
-	
-	
 	private void bindViews()
 	{
 		halfPodButton = (Button) getView().findViewById(R.id.HalfPod);
@@ -75,7 +79,18 @@ public class PODFragment extends Fragment implements OnClickListener
 				Toast.makeText(getActivity(), "Space not available", Toast.LENGTH_LONG).show();
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
-			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, dealerId);
+			data = new JSONObject();
+			try
+			{
+				data.put(Constants.DEALER_ID, dealerId);
+				data.put(Constants.POD_TYPE, PODTYPE.POD_FULL);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			prefs.saveData(Constants.FILE_PATH_CAMERA, file.toString());
+			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, data.toString());
 			getActivity().startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
 			break;
 		case R.id.HalfPod:
@@ -86,7 +101,19 @@ public class PODFragment extends Fragment implements OnClickListener
 				Toast.makeText(getActivity(), "Space not available", Toast.LENGTH_LONG).show();
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
-			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, dealerId);
+
+			data = new JSONObject();
+			try
+			{
+				data.put(Constants.DEALER_ID, dealerId);
+				data.put(Constants.POD_TYPE, PODTYPE.POD_PARTIAL);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, data.toString());
+			prefs.saveData(Constants.FILE_PATH_CAMERA, file.toString());
 			getActivity().startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
 			break;
 		}
@@ -95,7 +122,7 @@ public class PODFragment extends Fragment implements OnClickListener
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		
+
 	}
 
 }

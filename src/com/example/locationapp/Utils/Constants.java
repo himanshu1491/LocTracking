@@ -14,6 +14,8 @@ public class Constants
 
 	public static String MEDIA_DIRECTORY_ROOT = Environment.getExternalStorageDirectory() + "/LocationApp";
 
+	public static String AUTH_TOKEN="AuthToken";
+
 	public static final int REQUESTCODE_CAMERA = 3;
 
 	public static final String FILE_PATH_CAMERA = "filepathcamera";
@@ -36,7 +38,7 @@ public class Constants
 
 	public static final String DEALER_ID_UPLOAD_POD = "dealer_id_pod";
 
-	public static final String UPLOAD_PHOTO = "/photoupload";
+	public static final String UPLOAD_PHOTO = "/savePod";
 
 	public static final String TOKEN = "token";
 
@@ -44,11 +46,11 @@ public class Constants
 
 	public static final String DEALER_NAME = "name";
 
-	public static final String DEALER_LOC = "loc";
+	public static final String DEALER_LOC = "latLong";
 
 	public static final String DEALER_ADD = "address";
 
-	public static final String DEALER_ID = "id";
+	public static final String DEALER_ID = "consigneeId";
 
 	public static final int DEALER_RADIUS = 100;
 
@@ -56,5 +58,16 @@ public class Constants
 
 	public static final String REFRESH_DEALER_DATA = "refresh_dealer_data";
 	
+	public static final String POD_TYPE="podType";
+	
+	public static final class PODTYPE
+	{
+		public static final String POD_PARTIAL = "partial";
+
+		public static final String POD_FULL = "full";
+	}
+	public static final String LOCATION="location";
+	
+	public static final String STS="sts";
 
 }

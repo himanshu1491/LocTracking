@@ -1,6 +1,7 @@
 package com.example.locationapp.GeoFence;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -14,12 +15,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingApi;
 import com.google.android.gms.location.LocationServices;
 
 public class GeoFenceManager
 {
 
-	protected static final String TAG = "creating-and-monitoring-geofences";
+	protected static final String TAG = "geofences";
 
 	protected ArrayList<Geofence> mGeofenceList;
 
@@ -44,7 +46,7 @@ public class GeoFenceManager
 	{
 		if (!mGoogleApiClient.isConnected())
 		{
-			Log.d("Geofence", "Error client not coonected");
+			Log.d(TAG, "Error client not coonected");
 		}
 		LocationServices.GeofencingApi.addGeofences(mGoogleApiClient, mGeofenceList, getGeofencePendingIntent()).setResultCallback(new ResultCallback<Status>()
 		{
@@ -52,7 +54,7 @@ public class GeoFenceManager
 			@Override
 			public void onResult(Status arg0)
 			{
-				Log.d(TAG, "status is " + arg0.toString());
+				Log.d(TAG, "Geofence Adding Status is  " + arg0.toString());
 			}
 		});
 	}
@@ -80,6 +82,42 @@ public class GeoFenceManager
 	public synchronized void addGeoFenceToList(Geofence geofence)
 	{
 		mGeofenceList.add(geofence);
+	}
+	
+	public synchronized void removeAllGeofence()
+	{
+		if(!mGoogleApiClient.isConnected())
+		{
+			return;
+		}
+		LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, getGeofencePendingIntent()).setResultCallback(new ResultCallback<Status>()
+		{
+			
+			@Override
+			public void onResult(Status arg0)
+			{
+				
+				Log.d(TAG, "Geofence remove all  " + arg0.toString());
+			}
+		});
+	}
+	
+	public synchronized void removeGeofence(List<String> reqId)
+	{
+		if(!mGoogleApiClient.isConnected())
+		{
+			return;
+		}
+		LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient, reqId).setResultCallback(new ResultCallback<Status>()
+		{
+			
+			@Override
+			public void onResult(Status arg0)
+			{
+				
+				Log.d(TAG, "Geofence removed specific Id status is   " + arg0.toString());
+			}
+		});
 	}
 
 }

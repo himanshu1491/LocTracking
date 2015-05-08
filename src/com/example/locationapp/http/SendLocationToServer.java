@@ -28,11 +28,12 @@ public class SendLocationToServer implements Runnable
 		JSONObject body = new JSONObject();
 		try
 		{
-			body.put("location", location.getLatitude() + "," + location.getLongitude());
+			body.put(Constants.LOCATION, location.getLatitude() + "," + location.getLongitude());
+			body.put(Constants.STS, System.currentTimeMillis()/1000);
 
 			StringEntity entity = new StringEntity(body.toString());
 
-			RequestParams params = new RequestBuilder().setEntity(entity).setUrl(URL).build();
+			RequestParams params = new RequestBuilder().setEntity(entity).AddToken(true).setUrl(URL).build();
 
 			HTTPManager.post(params, new IResponse()
 			{

@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
+import com.example.locationapp.Utils.Utils;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService
@@ -38,6 +39,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	{
 		Log.d("GCMID", registrationId);
 		LocationSharedPreference.getInstance().saveData(Constants.GCM_ID, registrationId);
+		Utils.sendGCMIDToServer(context);
 
 	}
 

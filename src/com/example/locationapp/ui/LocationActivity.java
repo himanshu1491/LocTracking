@@ -2,6 +2,9 @@ package com.example.locationapp.ui;
 
 import java.io.File;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -118,8 +121,21 @@ public class LocationActivity extends ActionBarActivity
 					Utils.compressImage(filePath, destinationFile.toString());
 					file.delete();
 
-					String dealerId = prefs.getData(Constants.DEALER_ID_UPLOAD_POD, "");
-					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(dealerId, destinationFile.toString()));
+					JSONObject cameraData=null;
+					String dealerId=null;
+					String PODType=null;
+					try
+					{
+						cameraData = new JSONObject(prefs.getData(Constants.DEALER_ID_UPLOAD_POD, ""));
+					}
+					catch (JSONException e)
+					{
+						e.printStackTrace();
+					}
+					dealerId=cameraData.optString(Constants.DEALER_ID,"");
+					PODType=cameraData.optString(Constants.POD_TYPE);
+					
+					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(PODType,dealerId, destinationFile.toString()));
 					Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
 					if (dealer != null)
 					{

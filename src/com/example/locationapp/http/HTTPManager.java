@@ -16,6 +16,8 @@ import com.example.locationapp.Utils.Utils;
 
 public class HTTPManager
 {
+	
+	private static final String TAG="HTTPLOC";
 
 	public static void post(RequestParams params, IResponse response)
 	{
@@ -25,7 +27,7 @@ public class HTTPManager
 		post.setHeader("Content-type", "application/json");
 		HttpResponse res = null;
 
-		Log.d("HTTP", "GOING TO EXECUTE " + params.getUrl());
+		Log.d(TAG, "GOING TO EXECUTE " + params.getUrl());
 		if (params.isAddToken())
 		{
 			addToken(post);
@@ -35,23 +37,23 @@ public class HTTPManager
 			res = client.execute(post);
 			if (res.getStatusLine().getStatusCode() != 200)
 			{
-				Log.w("SendLocToServer", "Request Failed: " + res.getStatusLine());
+				Log.w(TAG, "Request Failed: " + res.getStatusLine());
 				response.onFailure(res.getStatusLine().getStatusCode());
 				return;
 			}
-
-			response.onSuccess(EntityUtils.toString(res.getEntity()));
-			Log.d("HTTP", "SUCESS " + EntityUtils.toString(res.getEntity()));
+			String responseFromServer=EntityUtils.toString(res.getEntity());
+			response.onSuccess(responseFromServer);
+			Log.d(TAG, "SUCESS " + responseFromServer);
 		}
 		catch (ClientProtocolException e)
 		{
-			Log.d("HTTP", "Failed " + e);
+			Log.d(TAG, "Failed " + e);
 			e.printStackTrace();
 			response.onFailure(1);
 		}
 		catch (IOException e)
 		{
-			Log.d("HTTP", "Failed " + e);
+			Log.d(TAG, "Failed " + e);
 			response.onFailure(1);
 			e.printStackTrace();
 		}
@@ -79,7 +81,7 @@ public class HTTPManager
 	private static void addToken(HttpPost post)
 	{
 		String token = LocationSharedPreference.getInstance().getData(Constants.TOKEN, "");
-		post.addHeader("authToken", token);
+		post.addHeader(Constants.AUTH_TOKEN, token);
 
 	}
 

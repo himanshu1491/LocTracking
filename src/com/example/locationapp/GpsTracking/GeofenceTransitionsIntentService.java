@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.actionbarsetup.R;
+import com.example.locationapp.GeoFence.GeoFenceManager;
 import com.example.locationapp.GeoFence.GeofenceErrorMessages;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
@@ -29,7 +30,7 @@ import com.google.android.gms.location.GeofencingEvent;
 
 public class GeofenceTransitionsIntentService extends IntentService
 {
-	protected static final String TAG = "geofence-transitions-service";
+	protected static final String TAG = "geofences";
 
 	public GeofenceTransitionsIntentService()
 	{
@@ -99,8 +100,11 @@ public class GeofenceTransitionsIntentService extends IntentService
 				dealer.setState(DealerState.WITHIN_RADIUS);
 				LocationApp.getInstance().putDealerDetailsInMap(dealer);
 				LocationThreadPoolExecutor.getInstance().execute(new NotifyDealer(dealer.getId()));
+				
 			}
 		}
+		
+		GeoFenceManager.getInstance().removeGeofence(triggeringGeofencesIdsList);
 
 		String triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList);
 

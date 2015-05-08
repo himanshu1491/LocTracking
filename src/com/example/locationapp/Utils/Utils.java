@@ -51,6 +51,7 @@ public class Utils
 		}
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		cm.setMaxTotal(10);
+	
 		client = HttpClients.custom().setConnectionManager(cm).build();
 		return client;
 
@@ -90,9 +91,10 @@ public class Utils
 			else
 			{
 				Log.d("GCMID", "Already Registered...>>>" + GCMRegistrar.getRegistrationId(context));
+				sendGCMIDToServer(context);
 
 			}
-			sendGCMIDToServer(context);
+			
 		}
 		catch (Exception e)
 		{
