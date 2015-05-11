@@ -101,9 +101,11 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 	{
 		ConcurrentHashMap<String, Dealer> mDealer = LocationApp.getInstance().dealerMap;
 
+		
 		for (java.util.Map.Entry<String, Dealer> entry : mDealer.entrySet())
 		{
 			dealerData.add(entry.getValue());
+			Log.d("Dealer data",entry.getValue().getState()+"");
 		}
 	}
 

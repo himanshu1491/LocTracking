@@ -8,10 +8,13 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -32,16 +35,25 @@ public class LocationActivity extends ActionBarActivity
 
 	private LocationSharedPreference prefs = LocationSharedPreference.getInstance();
 
+	private boolean attachToPODFragment = false;
+
+	private boolean attachToDealerFragment = false;
+
+	private String dealerId;
+
+	String PODType = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Log.d(this.getClass().getSimpleName(), "onCreate");
 		setContentView(R.layout.activity_main);
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setLogo(R.drawable.ic_launcher);
 		actionBar.setDisplayUseLogoEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
-		
+
 		initFragment();
 	}
 
@@ -64,9 +76,7 @@ public class LocationActivity extends ActionBarActivity
 	{
 		getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
 	}
-	
-	
-	
+
 	private void initFragment()
 	{
 		FragmentManager fm = getSupportFragmentManager();
@@ -78,7 +88,7 @@ public class LocationActivity extends ActionBarActivity
 		else
 		{
 			dealerFragment = (DealerFragment) fm.findFragmentByTag(DealerFragment.class.getName());
-			ft.remove(dealerFragment).commit();
+			ft.remove(dealerFragment).commitAllowingStateLoss();
 			fm.popBackStack();
 			ft = fm.beginTransaction();
 			dealerFragment = new DealerFragment();
@@ -106,56 +116,79 @@ public class LocationActivity extends ActionBarActivity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		if (requestCode == Constants.REQUESTCODE_CAMERA && resultCode == Activity.RESULT_OK)
+		super.onActivityResult(requestCode, resultCode, data);
+		Log.d(this.getClass().getSimpleName(), "onActivityResult");
+		if (requestCode == Constants.REQUESTCODE_CAMERA)
 		{
-			String filePath = prefs.getData(Constants.FILE_PATH_CAMERA, null);
-			prefs.removeData(Constants.FILE_PATH_CAMERA);
-			if (filePath != null)
+			JSONObject cameraData = null;
+			try
 			{
-				File file = new File(filePath);
-
-				if ((file != null) && (file.exists()))
+				cameraData = new JSONObject(prefs.getData(Constants.DEALER_ID_UPLOAD_POD, ""));
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+			dealerId = cameraData.optString(Constants.DEALER_ID, "");
+			Log.d(this.getClass().getName(), "Dealer ID is " + dealerId);
+			PODType = cameraData.optString(Constants.POD_TYPE);
+			if (resultCode == Activity.RESULT_OK)
+			{
+				String filePath = prefs.getData(Constants.FILE_PATH_CAMERA, null);
+				prefs.removeData(Constants.FILE_PATH_CAMERA);
+				if (filePath != null)
 				{
-					File destinationFile = Utils.createNewFile("cam_compress");
-					prefs.saveData(Constants.FILE_PATH_CAMERA_COMPRESS, destinationFile.toString());
-					Utils.compressImage(filePath, destinationFile.toString());
-					file.delete();
+					File file = new File(filePath);
 
-					JSONObject cameraData=null;
-					String dealerId=null;
-					String PODType=null;
-					try
+					if ((file != null) && (file.exists()))
 					{
-						cameraData = new JSONObject(prefs.getData(Constants.DEALER_ID_UPLOAD_POD, ""));
+						File destinationFile = Utils.createNewFile("cam_compress");
+						prefs.saveData(Constants.FILE_PATH_CAMERA_COMPRESS, destinationFile.toString());
+						Utils.compressImage(filePath, destinationFile.toString());
+						file.delete();
+
+						LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(PODType, dealerId, destinationFile.toString()));
+						Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
+						if (dealer != null)
+						{
+							dealer.setState(DealerState.POD_COLLECTED);
+							LocationApp.getInstance().putDealerDetailsInMap(dealer);
+						}
+						attachToDealerFragment = true;
 					}
-					catch (JSONException e)
-					{
-						e.printStackTrace();
-					}
-					dealerId=cameraData.optString(Constants.DEALER_ID,"");
-					PODType=cameraData.optString(Constants.POD_TYPE);
-					
-					LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(PODType,dealerId, destinationFile.toString()));
-					Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
-					if (dealer != null)
-					{
-						dealer.setState(DealerState.POD_COLLECTED);
-						LocationApp.getInstance().putDealerDetailsInMap(dealer);
-					}
+				}
+
+			}
+			else
+			{
+				if (resultCode == Activity.RESULT_CANCELED)
+				{
+					attachToPODFragment = true;
 
 				}
 			}
+		}
 
-		}
-		else
+	}
+
+	@Override
+	protected void onPostResume()
+	{
+		super.onPostResume();
+		Log.d(this.getClass().getSimpleName(), "onPostResume");
+		Log.d(this.getClass().getName(), "Dealer ID is " + dealerId);
+		if (attachToDealerFragment)
 		{
-			if (requestCode == Constants.REQUESTCODE_CAMERA && resultCode == Activity.RESULT_CANCELED)
-			{
-				String dealerId = prefs.getData(Constants.DEALER_ID_UPLOAD_POD, "");
-				attachPodFragment(dealerId);
-			}
+			initFragment();
 		}
-		super.onActivityResult(requestCode, resultCode, data);
+		else if (attachToPODFragment && !TextUtils.isEmpty(dealerId))
+		{
+			attachPodFragment(dealerId);
+		}
+		attachToDealerFragment = false;
+		attachToPODFragment = false;
+		dealerId = "";
+
 	}
 
 	public void attachPodFragment(String id)
@@ -169,8 +202,11 @@ public class LocationActivity extends ActionBarActivity
 		else
 		{
 			podFragment = (PODFragment) fm.findFragmentByTag(PODFragment.class.getName());
-			ft.remove(podFragment).commit();
-			fm.popBackStack();
+			if (fm.getBackStackEntryCount() > 0)
+			{
+				fm.popBackStack();
+			}
+			ft.remove(podFragment).commitAllowingStateLoss();
 			ft = fm.beginTransaction();
 			podFragment = new PODFragment();
 		}
@@ -181,7 +217,7 @@ public class LocationActivity extends ActionBarActivity
 		ft.addToBackStack(null);
 		if (!isFinishing())
 		{
-			ft.replace(R.id.container, podFragment, PODFragment.class.getName()).commit();
+			ft.replace(R.id.container, podFragment, PODFragment.class.getName()).commitAllowingStateLoss();
 		}
 		shouldDisplayHomeUp();
 	}

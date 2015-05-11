@@ -9,11 +9,12 @@ import org.json.JSONObject;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.util.Base64;
 import android.util.Log;
 
+import com.example.locationapp.GpsTracking.GPSTracker;
 import com.example.locationapp.Utils.Constants;
-import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.http.HTTPManager.IResponse;
 import com.example.locationapp.http.RequestParams.RequestBuilder;
@@ -55,6 +56,13 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 			body.put(Constants.DEALER_ID, dealerId);
 			body.put("img", encodedImage);
 			body.put(Constants.POD_TYPE, PodType);
+			Location location=GPSTracker.getInstance().getLastKnownLocation();
+			Log.d("locattt",location+"");
+			if(location!=null)
+			{
+				body.put(Constants.LOCATION, location.getLatitude() + "," + location.getLongitude());
+			}
+			body.put(Constants.STS, System.currentTimeMillis()/1000);
 			StringLocEntity entity = new StringLocEntity(body.toString(), this);
 			String URL = Constants.HTTP_STRING + Constants.DEV_STAGING_HOST + Constants.UPLOAD_PHOTO;
 

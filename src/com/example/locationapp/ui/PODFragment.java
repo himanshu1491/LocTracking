@@ -77,6 +77,7 @@ public class PODFragment extends Fragment implements OnClickListener
 			if (file == null)
 			{
 				Toast.makeText(getActivity(), "Space not available", Toast.LENGTH_LONG).show();
+				return;
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
 			data = new JSONObject();
@@ -99,6 +100,7 @@ public class PODFragment extends Fragment implements OnClickListener
 			if (file == null)
 			{
 				Toast.makeText(getActivity(), "Space not available", Toast.LENGTH_LONG).show();
+				return;
 			}
 			in = Utils.getNativeCameraAppIntent(true, file);
 
@@ -122,7 +124,7 @@ public class PODFragment extends Fragment implements OnClickListener
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 }

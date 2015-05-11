@@ -11,11 +11,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,8 +36,10 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -41,7 +52,7 @@ import com.google.android.gcm.GCMRegistrar;
 public class Utils
 {
 
-	private static CloseableHttpClient client = null;
+	private static HttpClient client = null;
 
 	public static synchronized HttpClient getClient()
 	{
@@ -49,10 +60,21 @@ public class Utils
 		{
 			return client;
 		}
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		cm.setMaxTotal(10);
-	
-		client = HttpClients.custom().setConnectionManager(cm).build();
+		// PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		// cm.setMaxTotal(10);
+
+		// client = HttpClients.custom().setConnectionManager(cm).setUserAgent( System.getProperty("http.agent")).build();
+		HttpParams params = new BasicHttpParams();
+
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
+		HttpProtocolParams.setUseExpectContinue(params, true);
+
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
+		client = new DefaultHttpClient(cm, params);
+		client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, System.getProperty("http.agent"));
 		return client;
 
 	}
@@ -94,7 +116,7 @@ public class Utils
 				sendGCMIDToServer(context);
 
 			}
-			
+
 		}
 		catch (Exception e)
 		{
@@ -166,9 +188,11 @@ public class Utils
 	{
 		InputStream src;
 		Bitmap tempBmp = null;
+		String imageOrientation = Utils.getImageOrientation(srcFilePath);
 		tempBmp = scaleDownBitmap(srcFilePath, Constants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, Constants.MAX_DIMENSION_MEDIUM_FULL_SIZE_PX, Bitmap.Config.RGB_565, true, false);
 		try
 		{
+			tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 			if (tempBmp != null)
 			{
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG, 75);
@@ -210,6 +234,22 @@ public class Utils
 			Log.e("Utils", "WTF Error while reading/writing/closing file", ex);
 			return false;
 		}
+	}
+
+	private static String getImageOrientation(String filePath)
+	{
+		ExifInterface exif;
+		try
+		{
+			exif = new ExifInterface(filePath);
+			return exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+		}
+		catch (IOException e)
+		{
+			Log.e("Utils", "Error while opening file", e);
+			return null;
+		}
+
 	}
 
 	public static Bitmap scaleDownBitmap(String filename, int reqWidth, int reqHeight, Bitmap.Config config, boolean finResMoreThanReq, boolean scaleUp)
@@ -461,6 +501,78 @@ public class Utils
 
 		}
 		return root.toString();
-
 	}
+
+	public static int getRotatedAngle(String imageOrientation)
+	{
+		if (!TextUtils.isEmpty(imageOrientation))
+		{
+			switch (Integer.parseInt(imageOrientation))
+			{
+			case ExifInterface.ORIENTATION_ROTATE_180:
+				return 180;
+			case ExifInterface.ORIENTATION_ROTATE_270:
+				return 270;
+			case ExifInterface.ORIENTATION_ROTATE_90:
+				return 90;
+			}
+		}
+		return 0;
+	}
+
+	public static Bitmap rotateBitmap(Bitmap b, int degrees)
+	{
+		if (degrees != 0 && b != null)
+		{
+			Matrix m = new Matrix();
+			m.setRotate(degrees, (float) b.getWidth() / 2, (float) b.getHeight() / 2);
+			try
+			{
+				Bitmap b2 = createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), m, true);
+				if (b2 != null)
+				{
+					if (b != b2)
+					{
+						b.recycle();
+						b = b2;
+					}
+				}
+			}
+			catch (OutOfMemoryError e)
+			{
+				Log.e("Utils", "Out of memory", e);
+			}
+		}
+		return b;
+	}
+
+	public static Bitmap createBitmap(Bitmap bm, int i, int j, int width, int height, Matrix m, boolean c)
+	{
+		Bitmap b = null;
+		try
+		{
+			b = Bitmap.createBitmap(bm, i, j, width, height, m, c);
+		}
+		catch (OutOfMemoryError e)
+		{
+
+			System.gc();
+
+			try
+			{
+				b = Bitmap.createBitmap(bm, i, j, width, height, m, c);
+			}
+			catch (OutOfMemoryError ex)
+			{
+			}
+			catch (Exception exc)
+			{
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		return b;
+	}
+
 }
