@@ -167,7 +167,7 @@ public class GeofenceTransitionsIntentService extends IntentService
 		case Geofence.GEOFENCE_TRANSITION_EXIT:
 			return ("exit");
 		default:
-			return ("pata ni");
+			return ("enter");
 		}
 	}
 }
