@@ -53,7 +53,7 @@ public class LocationActivity extends ActionBarActivity
 		actionBar.setLogo(R.drawable.ic_launcher);
 		actionBar.setDisplayUseLogoEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
-
+Log.d("MainActivity","i");
 		initFragment();
 	}
 
