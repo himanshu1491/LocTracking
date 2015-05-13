@@ -53,6 +53,8 @@ public class Constants
 	public static final String DEALER_ID = "consigneeId";
 
 	public static final int DEALER_RADIUS = 100;
+	
+	public static final String DEALER_POD_STATUS = "podStatus";
 
 	public static final String START_TRACKING = "startTracking";
 
@@ -69,5 +71,20 @@ public class Constants
 	public static final String LOCATION="location";
 	
 	public static final String STS="sts";
+
+	public static final class DatabaseConstants
+	{
+		public static final String NAME = "DB_RTPORT";
+
+		public static final int VERSION = 1;
+
+		public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
+
+		public static final String DEALER_TABLE = "dealer";
+
+		public static final String _ID = "_id";
+
+		public static final String DEALER_DATA = "data";
+	}
 
 }

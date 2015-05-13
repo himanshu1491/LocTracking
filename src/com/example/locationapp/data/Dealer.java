@@ -44,6 +44,7 @@ public class Dealer
 			this.coordinateLng = Double.parseDouble(dealer.getString(Constants.DEALER_LOC).split(",")[1]);
 			this.setAddress(dealer.getString(Constants.DEALER_ADD));
 			this.Id = dealer.getString(Constants.DEALER_ID);
+			this.state=dealer.optInt(Constants.DEALER_POD_STATUS,DealerState.NORMAL);
 
 		}
 		catch (JSONException e)
@@ -162,5 +163,24 @@ public class Dealer
 		public static final int WITHIN_RADIUS = 2;
 
 		public static final int POD_COLLECTED = 3;
+	}
+	
+	public String toJSONString()
+	{
+		JSONObject object=new JSONObject();
+		try
+		{
+			object.put(Constants.DEALER_NAME, name);
+			object.put(Constants.DEALER_ID, Id);
+			object.put(Constants.DEALER_ADD, address);
+			object.put(Constants.DEALER_LOC, coordinateLat+","+coordinateLng+"");
+			object.put(Constants.DEALER_POD_STATUS, state);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		return object.toString();
+		
 	}
 }

@@ -17,6 +17,7 @@ import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.services.LocationService;
 
 public class LocationApp extends Application
@@ -60,30 +61,32 @@ public class LocationApp extends Application
 
 	public void fillDealerMap()
 	{
-		String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
-
-		if (!TextUtils.isEmpty(dealerdetails))
-		{
-			try
-			{
-				JSONObject object = new JSONObject(dealerdetails);
-
-				JSONArray array = object.getJSONArray(Constants.DEALER_DETAILS);
-
-				JSONObject dealer = null;
-				for (int i = 0; i < array.length(); i++)
-				{
-					dealer = array.getJSONObject(i);
-
-					Dealer dea = new Dealer(dealer);
-					putDealerDetailsInMap(dea);
-				}
-			}
-			catch (JSONException e)
-			{
-				e.printStackTrace();
-			}
-		}
+//		String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
+//
+//		if (!TextUtils.isEmpty(dealerdetails))
+//		{
+//			try
+//			{
+//				JSONObject object = new JSONObject(dealerdetails);
+//
+//				JSONArray array = object.getJSONArray(Constants.DEALER_DETAILS);
+//
+//				JSONObject dealer = null;
+//				for (int i = 0; i < array.length(); i++)
+//				{
+//					dealer = array.getJSONObject(i);
+//
+//					Dealer dea = new Dealer(dealer);
+//					putDealerDetailsInMap(dea);
+//				}
+//			}
+//			catch (JSONException e)
+//			{
+//				e.printStackTrace();
+//			}
+//		}
+		
+		LocationDB.getInstance().getAllDealerData();
 	}
 
 	public Dealer getDealerDetails(String dealerid)

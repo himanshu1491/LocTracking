@@ -25,6 +25,7 @@ import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.data.Dealer;
 import com.example.locationapp.data.Dealer.DealerState;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.UploadPhotoTask;
 
 public class LocationActivity extends ActionBarActivity
@@ -53,7 +54,6 @@ public class LocationActivity extends ActionBarActivity
 		actionBar.setLogo(R.drawable.ic_launcher);
 		actionBar.setDisplayUseLogoEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
-Log.d("MainActivity","i");
 		initFragment();
 	}
 
@@ -148,11 +148,24 @@ Log.d("MainActivity","i");
 						file.delete();
 
 						LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(PODType, dealerId, destinationFile.toString()));
-						Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
+						final Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
 						if (dealer != null)
 						{
 							dealer.setState(DealerState.POD_COLLECTED);
 							LocationApp.getInstance().putDealerDetailsInMap(dealer);
+
+							// TODO To be done on background thread.
+							LocationThreadPoolExecutor.getInstance().execute(new Runnable()
+							{
+
+								@Override
+								public void run()
+								{
+									LocationDB.getInstance().insertIntoDealerTable(dealer);
+
+								}
+							});
+
 						}
 						attachToDealerFragment = true;
 					}

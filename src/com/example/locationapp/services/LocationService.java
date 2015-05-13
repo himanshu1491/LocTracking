@@ -22,6 +22,8 @@ import com.example.locationapp.GpsTracking.ILocationCallback;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
+import com.example.locationapp.data.Dealer;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.SendLocationToServer;
 import com.example.locationapp.ui.LocationApp;
 import com.google.android.gms.common.ConnectionResult;
@@ -144,14 +146,43 @@ public class LocationService extends Service implements ILocationCallback
 		public void onReceive(Context context, Intent intent)
 		{
 			LocationSharedPreference.getInstance().saveData(Constants.DEALER_DETAILS, intent.getStringExtra("message"));
+		
 			LocationApp.getInstance().clearDealerData();
+			LocationDB.getInstance().deleteAllDealerData();
 			mGeoFenceManager.removeAllGeofence();
 			gpsTracker.stopTracking();
+			insertIntoDealerDB(intent.getStringExtra("message"));
 			LocationApp.getInstance().fillDealerMap();
 			context.sendBroadcast(new Intent(Constants.REFRESH_DEALER_DATA));
 			startTracking();
 
 		}
 	};
+
+	public void insertIntoDealerDB(String dealerdetails)
+	{
+		JSONObject object = null;
+		JSONArray array = null;
+		try
+		{
+			object = new JSONObject(dealerdetails);
+
+			array = object.getJSONArray(Constants.DEALER_DETAILS);
+
+			JSONObject dealer = null;
+			for (int i = 0; i < array.length(); i++)
+			{
+				dealer = array.getJSONObject(i);
+
+				Dealer dea = new Dealer(dealer);
+				LocationDB.getInstance().insertIntoDealerTable(dea);
+			}
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }
