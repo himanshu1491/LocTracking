@@ -52,7 +52,6 @@ public class LocationApp extends Application
 		prefs = LocationSharedPreference.getInstance();
 		Utils.registerGCMID(getApplicationContext());
 		fillDealerMap();
-		ConsumerLocation.getInstance().start();
 		Log.d("dealer",getDealerDetails("23")+"");
 	}
 

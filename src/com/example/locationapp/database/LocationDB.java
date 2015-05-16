@@ -20,7 +20,9 @@ import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.Constants.DatabaseConstants;
 import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
+import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.http.SendLocationToServer;
 import com.example.locationapp.ui.LocationApp;
 
 public class LocationDB extends SQLiteOpenHelper
@@ -224,6 +226,33 @@ public class LocationDB extends SQLiteOpenHelper
 		deleteAllDealerData();
 		deleteAllFromGeofenceTable();
 		deleteAllLocationTable();
+	}
+	
+	public void fetchAllLocationAndSendToServer()
+	{
+		String sql = "SELECT * FROM " + DatabaseConstants.LOCATION_TABLE + " WHERE  " + DatabaseConstants.LOCATION_SERVER_SYNCED_STATUS + " = " + "0";
+		try
+		{
+			Cursor cursor = mmDb.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					Location location = new Location("GPS");
+					double lat = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DatabaseConstants.LOCATION_COORDINATE)).split(",")[0]);
+					double lng = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DatabaseConstants.LOCATION_COORDINATE)).split(",")[1]);
+					location.setLatitude(lat);
+					location.setLongitude(lng);
+					long sts = Long.parseLong(cursor.getString(cursor.getColumnIndex(DatabaseConstants.STS)));
+					ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(location, sts));
+				}
+				while (cursor.moveToNext());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 

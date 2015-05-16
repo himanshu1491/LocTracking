@@ -65,7 +65,10 @@ public class HTTPManager
 			{
 				try
 				{
-					res.getEntity().getContent().close();
+					if(res.getEntity().isRepeatable())
+					{
+						res.getEntity().getContent().close();
+					}
 				}
 				catch (IllegalStateException e)
 				{

@@ -73,7 +73,17 @@ public class LocationService extends Service implements ILocationCallback
 
 		if (LocationSharedPreference.getInstance().getData(Constants.SYSTEM_ON,false))
 		{
+			ConsumerLocation.getInstance().start();
 			gpsTracker.startTracking();
+			LocationThreadPoolExecutor.getInstance().execute(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					LocationDB.getInstance().fetchAllLocationAndSendToServer();
+				}
+			});
 		}
 	}
 

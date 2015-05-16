@@ -10,7 +10,7 @@ import com.example.locationapp.http.SendLocationToServer;
 
 public class ConsumerLocation extends Thread
 {
-
+//adb logcat | grep -ni -e  "ConnectionChangeReceiver" -e "ConsumerLocation" -e "LocationDB" 
 	private static BlockingQueue<SendLocationToServer> queue=null;
 	
 	private AtomicBoolean isNetworkAvalable;
