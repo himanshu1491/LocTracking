@@ -10,6 +10,8 @@ import android.util.Log;
 import com.example.locationapp.GpsTracking.GPSTracker;
 import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.GpsTracking.GeofenceTransitionsIntentService;
+import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.ui.LocationApp;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -54,6 +56,7 @@ public class GeoFenceManager
 			@Override
 			public void onResult(Status arg0)
 			{
+				LocationSharedPreference.getInstance().saveData(Constants.SYSTEM_ON, true);
 				Log.d(TAG, "Geofence Adding Status is  " + arg0.toString());
 			}
 		});

@@ -1,5 +1,8 @@
 package com.example.locationapp.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +23,7 @@ import com.example.locationapp.GpsTracking.GPSTracker;
 import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.GpsTracking.ILocationCallback;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.data.Dealer;
@@ -66,7 +70,7 @@ public class LocationService extends Service implements ILocationCallback
 		gpsTracker.addListener(this);
 		String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
 
-		if (!TextUtils.isEmpty(dealerdetails))
+		if (LocationSharedPreference.getInstance().getData(Constants.SYSTEM_ON,false))
 		{
 			gpsTracker.startTracking();
 		}
@@ -97,15 +101,17 @@ public class LocationService extends Service implements ILocationCallback
 
 	private void addGeofence(String dealerdetails)
 	{
-		if (!TextUtils.isEmpty(dealerdetails))
+		if (!LocationSharedPreference.getInstance().getData(Constants.SYSTEM_ON,false)&&!TextUtils.isEmpty(dealerdetails))
 		{
+			ArrayList<GeoLocationStore> list=null;;
 			try
 			{
 				JSONObject object = new JSONObject(dealerdetails);
 
 				JSONArray array = object.getJSONArray(Constants.DEALER_DETAILS);
-
+				
 				JSONObject dealer = null;
+				list=new ArrayList<GeoLocationStore>(array.length());
 				for (int i = 0; i < array.length(); i++)
 				{
 					dealer = array.getJSONObject(i);
@@ -114,17 +120,53 @@ public class LocationService extends Service implements ILocationCallback
 					double lng = Double.parseDouble(dealer.getString(Constants.DEALER_LOC).split(",")[1]);
 					String address = dealer.getString(Constants.DEALER_ADD);
 					String id = dealer.getString(Constants.DEALER_ID);
-
-					GeoLocationStore geostore = new GeoLocationStore(lat, lng, Constants.DEALER_RADIUS, id, Geofence.GEOFENCE_TRANSITION_DWELL);
+					int radius=dealer.optInt(Constants.DEALER_RADIUS,Constants.DEALER_RADIUS_VALUE);
+					GeoLocationStore geostore = new GeoLocationStore(lat, lng, radius, id, Geofence.GEOFENCE_TRANSITION_DWELL);
+					list.add(geostore);
 					mGeoFenceManager.addGeoFenceToList(mGeoFenceManager.getGeoFence(geostore));
 				}
 				mGeoFenceManager.setUpGeofence();
+				addGeoFenceToDB(list);
 			}
 			catch (JSONException e)
 			{
 				e.printStackTrace();
 			}
 		}
+		else
+		{
+			List<GeoLocationStore> list = LocationDB.getInstance().getAllGeofences();
+			if (list == null || list.isEmpty())
+			{
+				return;
+			}
+
+			for (GeoLocationStore store : list)
+			{
+				Log.d("geofences", "Going to add to geofence with id " + store.getRequestId());
+				mGeoFenceManager.addGeoFenceToList(mGeoFenceManager.getGeoFence(store));
+			}
+			mGeoFenceManager.setUpGeofence();
+		}
+	}
+
+	private void addGeoFenceToDB(final ArrayList<GeoLocationStore> list)
+	{
+		LocationThreadPoolExecutor.getInstance().execute(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				for(GeoLocationStore geoLocationStore:list)
+				{
+					LocationDB.getInstance().insertIntoGeofenceTable(geoLocationStore,GEOFENCESTATUS.GEOFENCE_NOTENTERED);
+				}
+				
+			}
+		});
+		
+		
 	}
 
 	@Override
@@ -133,10 +175,22 @@ public class LocationService extends Service implements ILocationCallback
 	}
 
 	@Override
-	public void onLocationChanged(Location location)
+	public void onLocationChanged(final Location location)
 	{
 		Log.i(TAG, "Location Changed" + location.toString() + location.getProvider());
-		LocationThreadPoolExecutor.getInstance().execute(new SendLocationToServer(location));
+	
+		//inserting into DB first;
+		LocationThreadPoolExecutor.getInstance().execute(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				LocationDB.getInstance().insertIntoLocationTable(location);
+				new SendLocationToServer(location).run();
+			}
+		});
+		
 	}
 
 	private BroadcastReceiver mStartTrackingBroadCastReceiver = new BroadcastReceiver()
@@ -145,10 +199,11 @@ public class LocationService extends Service implements ILocationCallback
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
+			LocationSharedPreference.getInstance().saveData(Constants.SYSTEM_ON, false);
 			LocationSharedPreference.getInstance().saveData(Constants.DEALER_DETAILS, intent.getStringExtra("message"));
 		
 			LocationApp.getInstance().clearDealerData();
-			LocationDB.getInstance().deleteAllDealerData();
+			LocationDB.getInstance().deleteAll();
 			mGeoFenceManager.removeAllGeofence();
 			gpsTracker.stopTracking();
 			insertIntoDealerDB(intent.getStringExtra("message"));

@@ -15,6 +15,8 @@ public class GeoLocationStore
 	private int transitionType;
 
 	private long expirationDuration = Geofence.NEVER_EXPIRE;
+	
+	private long loiterringTime=30*1000;
 
 	/**
 	 * @param lat
@@ -87,6 +89,22 @@ public class GeoLocationStore
 	public void setExpirationDuration(long expirationDuration)
 	{
 		this.expirationDuration = expirationDuration;
+	}
+
+	/**
+	 * @return the loiterringTime
+	 */
+	public long getLoiterringTime()
+	{
+		return loiterringTime;
+	}
+
+	/**
+	 * @param loiterringTime the loiterringTime to set
+	 */
+	public void setLoiterringTime(long loiterringTime)
+	{
+		this.loiterringTime = loiterringTime;
 	}
 
 }

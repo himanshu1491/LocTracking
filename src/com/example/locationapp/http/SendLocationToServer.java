@@ -1,6 +1,5 @@
 package com.example.locationapp.http;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
 

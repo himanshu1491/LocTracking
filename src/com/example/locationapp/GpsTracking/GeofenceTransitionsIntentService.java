@@ -19,9 +19,11 @@ import com.example.actionbarsetup.R;
 import com.example.locationapp.GeoFence.GeoFenceManager;
 import com.example.locationapp.GeoFence.GeofenceErrorMessages;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.data.Dealer;
 import com.example.locationapp.data.Dealer.DealerState;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.NotifyDealer;
 import com.example.locationapp.ui.LocationActivity;
 import com.example.locationapp.ui.LocationApp;
@@ -100,6 +102,8 @@ public class GeofenceTransitionsIntentService extends IntentService
 				dealer.setState(DealerState.WITHIN_RADIUS);
 				LocationApp.getInstance().putDealerDetailsInMap(dealer);
 				LocationThreadPoolExecutor.getInstance().execute(new NotifyDealer(dealer.getId()));
+				LocationDB.getInstance().updateGeoFenceTable(dealer.getId(),GEOFENCESTATUS.GEOFENCE_ENTERED);
+				LocationDB.getInstance().insertIntoDealerTable(dealer);
 				
 			}
 		}
