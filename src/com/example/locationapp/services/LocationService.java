@@ -24,6 +24,7 @@ import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.GpsTracking.ILocationCallback;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
+import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.data.Dealer;
@@ -187,7 +188,7 @@ public class LocationService extends Service implements ILocationCallback
 			public void run()
 			{
 				LocationDB.getInstance().insertIntoLocationTable(location);
-				new SendLocationToServer(location).run();
+				ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(location, System.currentTimeMillis() / 1000));
 			}
 		});
 		

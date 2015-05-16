@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.data.Dealer;
@@ -51,6 +52,7 @@ public class LocationApp extends Application
 		prefs = LocationSharedPreference.getInstance();
 		Utils.registerGCMID(getApplicationContext());
 		fillDealerMap();
+		ConsumerLocation.getInstance().start();
 		Log.d("dealer",getDealerDetails("23")+"");
 	}
 

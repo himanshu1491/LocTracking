@@ -7,16 +7,20 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.ConsumerLocation;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
 import com.example.locationapp.http.RequestParams.RequestBuilder;
 
 public class SendLocationToServer implements Runnable
 {
-	Location location;
+	private Location location;
+	public  long timeStamp;
 
-	public SendLocationToServer(Location loc)
+	public SendLocationToServer(Location loc,long timeStamp)
 	{
 		this.location = loc;
+		this.timeStamp=timeStamp;
 	}
 
 	@Override
@@ -28,7 +32,7 @@ public class SendLocationToServer implements Runnable
 		try
 		{
 			body.put(Constants.LOCATION, location.getLatitude() + "," + location.getLongitude());
-			body.put(Constants.STS, System.currentTimeMillis()/1000);
+			body.put(Constants.STS, timeStamp);
 
 			StringEntity entity = new StringEntity(body.toString());
 
@@ -41,13 +45,15 @@ public class SendLocationToServer implements Runnable
 				public void onSuccess(String response)
 				{
 					Log.d("SendLocToServer", "Thread is " + Thread.currentThread() + "res is >>>" + response);
-
+					LocationDB.getInstance().deleteFromLocationTable(location);
+					ConsumerLocation.getInstance().removeFromQueue(SendLocationToServer.this);
 				}
 
 				@Override
 				public void onFailure(int i)
 				{
 					Log.w("SendLocToServer", "Request Failed: " + i);
+					ConsumerLocation.getInstance().toggleNetworkState();
 
 				}
 			});

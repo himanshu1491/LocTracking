@@ -40,6 +40,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.ExifInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -47,6 +49,7 @@ import android.util.Log;
 
 import com.example.locationapp.data.Dealer;
 import com.example.locationapp.http.SendGCMIDToServer;
+import com.example.locationapp.ui.LocationApp;
 import com.google.android.gcm.GCMRegistrar;
 
 public class Utils
@@ -575,4 +578,33 @@ public class Utils
 		return b;
 	}
 
+	public static NetworkInfo getActiveNetInfo()
+	{
+		NetworkInfo info = null;
+		try
+		{
+			ConnectivityManager cm = (ConnectivityManager) LocationApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+			if (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected())
+			{
+				info = cm.getActiveNetworkInfo();
+			}
+			return info;
+		}
+		catch (NullPointerException e)
+		{
+			Log.e("Utils", "Exception :", e);
+		}
+		return null;
+	}
+	
+	public static boolean isOnline()
+	{
+		if(getActiveNetInfo() != null)
+		{
+			return true;
+		}
+		
+		return false;
+	}
 }

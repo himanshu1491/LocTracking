@@ -141,7 +141,8 @@ public class LocationDB extends SQLiteOpenHelper
 	public void deleteFromLocationTable(Location loc)
 	{
 		String cordicate = loc.getLatitude() + "," + loc.getLongitude() + "";
-		mmDb.delete(DatabaseConstants.LOCATION_TABLE, DatabaseConstants.LOCATION_COORDINATE + "= ", new String[] { cordicate });
+		long val=mmDb.delete(DatabaseConstants.LOCATION_TABLE, DatabaseConstants.LOCATION_COORDINATE + "=  ?", new String[] { cordicate });
+		Log.d(TAG,"delete form location table with val" + val+"");
 	}
 
 	public void deleteAllLocationTable()
@@ -209,7 +210,7 @@ public class LocationDB extends SQLiteOpenHelper
 	}
 	public void deleteFromGeofenceTable(String dealerId)
 	{
-		mmDb.delete(DatabaseConstants.GEOFENCE_TABLE,DatabaseConstants.GEOFENCE_DEALER_ID + " = ", new String[]{dealerId});
+		mmDb.delete(DatabaseConstants.GEOFENCE_TABLE,DatabaseConstants.GEOFENCE_DEALER_ID + " = ? ", new String[]{dealerId});
 	}
 	
 	public void deleteAllFromGeofenceTable()
