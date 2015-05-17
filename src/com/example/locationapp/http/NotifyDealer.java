@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
 import com.example.locationapp.http.RequestParams.RequestBuilder;
 
@@ -49,13 +51,16 @@ public class NotifyDealer implements Runnable
 			@Override
 			public void onSuccess(String response)
 			{
-
+				//Delete from DataBase;
+				LocationDB.getInstance().deleteFromGeofenceTable(dealerId);
+				ConsumerForEverythingElse.getInstance().removeFromQueue(NotifyDealer.this);
+				
 			}
 
 			@Override
 			public void onFailure(int i)
 			{
-
+				ConsumerForEverythingElse.getInstance().toggleNetworkState();
 			}
 		});
 	}

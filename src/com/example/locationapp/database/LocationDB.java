@@ -20,9 +20,12 @@ import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.Constants.DatabaseConstants;
 import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.http.NotifyDealer;
 import com.example.locationapp.http.SendLocationToServer;
+import com.example.locationapp.http.UploadPhotoTask;
 import com.example.locationapp.ui.LocationApp;
 
 public class LocationDB extends SQLiteOpenHelper
@@ -71,7 +74,9 @@ public class LocationDB extends SQLiteOpenHelper
 			+ DatabaseConstants.GEOFENCE_TRANSISTION_TYPE + " INTEGER DEFAULT 4, "//GEOFENCE_TRANSITION_DWELL
 			+ DatabaseConstants.GEOFENCE_STATUS +" INTEGER"
 			+" ) ";
-		
+		mmDb.execSQL(sql);
+		sql=DatabaseConstants.CREATE_TABLE + DatabaseConstants.PHOTO_TABLE +" ( "+ DatabaseConstants.PHOTO_FILE_PATH+ " STRING PRIMARY KEY, " + DatabaseConstants.PHOTO_DEALER_ID + " STRING ,"
+				+ DatabaseConstants.PHOTO_POD_TYPE + " STRING , " + DatabaseConstants.STS+ " STRING " + ")";
 		mmDb.execSQL(sql);
 	}
 
@@ -175,7 +180,7 @@ public class LocationDB extends SQLiteOpenHelper
 		Log.d(TAG,"update  into Geofence table with row id "+val+" and delaer id is "+dealerId);
 	}
 	
-	public List<GeoLocationStore> getAllGeofences()
+	public List<GeoLocationStore> getAllGeofencesWhichNotEntered()
 	{
 		List<GeoLocationStore> list=new ArrayList<GeoLocationStore>();
 		
@@ -210,9 +215,34 @@ public class LocationDB extends SQLiteOpenHelper
 		}
 		return list;
 	}
+	
+	public void fetchAllGeofencesAndSendToServer(){
+
+
+		String sql = "SELECT * FROM " + DatabaseConstants.GEOFENCE_TABLE + " WHERE  " + DatabaseConstants.GEOFENCE_STATUS + " = " + GEOFENCESTATUS.GEOFENCE_ENTERED;
+		try
+		{
+			Cursor cursor = mmDb.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					String dealerID = cursor.getString(cursor.getColumnIndex(DatabaseConstants.GEOFENCE_DEALER_ID));
+					ConsumerForEverythingElse.getInstance().addToQueue(new NotifyDealer(dealerID));
+				}
+				while (cursor.moveToNext());
+				
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	public void deleteFromGeofenceTable(String dealerId)
 	{
-		mmDb.delete(DatabaseConstants.GEOFENCE_TABLE,DatabaseConstants.GEOFENCE_DEALER_ID + " = ? ", new String[]{dealerId});
+		long val=mmDb.delete(DatabaseConstants.GEOFENCE_TABLE,DatabaseConstants.GEOFENCE_DEALER_ID + " = ? ", new String[]{dealerId});
+		Log.d(TAG,"delefe from geofence table with id"+dealerId +"and value is "+ val);
 	}
 	
 	public void deleteAllFromGeofenceTable()
@@ -226,6 +256,7 @@ public class LocationDB extends SQLiteOpenHelper
 		deleteAllDealerData();
 		deleteAllFromGeofenceTable();
 		deleteAllLocationTable();
+		deleteAllFromPhotoTable();
 	}
 	
 	public void fetchAllLocationAndSendToServer()
@@ -255,5 +286,54 @@ public class LocationDB extends SQLiteOpenHelper
 		}
 	}
 	
+	public void fetchAllPhotosAndSendToServer()
+	{
+		String sql = "SELECT * FROM " + DatabaseConstants.PHOTO_TABLE;
+		try
+		{
+			Cursor cursor = mmDb.rawQuery(sql, null);
+			if (cursor.moveToFirst())
+			{
+				do
+				{
+					String PodType = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_POD_TYPE));
+					String dealerId = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_DEALER_ID));
+					String filePath = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_FILE_PATH));
+
+					ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PodType, dealerId, filePath));
+				}
+				while (cursor.moveToNext());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	
+	public  void insertIntoPhotoTable(String FilePath,String PodType,String dealerID)
+	{
+		ContentValues cv=new ContentValues();
+		cv.put(DatabaseConstants.PHOTO_DEALER_ID, dealerID);
+		cv.put(DatabaseConstants.PHOTO_FILE_PATH, FilePath);
+		cv.put(DatabaseConstants.PHOTO_POD_TYPE, PodType);
+		cv.put(DatabaseConstants.STS, System.currentTimeMillis()/1000);
+		long val=mmDb.insertWithOnConflict(DatabaseConstants.PHOTO_TABLE,null, cv,SQLiteDatabase.CONFLICT_REPLACE);
+		Log.d(TAG,"inserted into Photo Table with id"+val);
+	}
+	
+	public void deleteFromPhotoTable(String filePath)
+	{
+		long val=mmDb.delete(DatabaseConstants.PHOTO_TABLE,DatabaseConstants.PHOTO_FILE_PATH + " = ? ", new String[]{filePath});
+		Log.d(TAG,"delefe from geofence table with id"+filePath +"and value is "+ val);
+	}
+	
+	public void deleteAllFromPhotoTable()
+	{
+		long val=mmDb.delete(DatabaseConstants.PHOTO_TABLE, null, null);
+		Log.d(TAG,"deletion  form  Photo table total rows  "+val+"");
+	}
+
 
 }

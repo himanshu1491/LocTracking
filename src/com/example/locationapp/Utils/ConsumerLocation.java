@@ -114,5 +114,9 @@ public class ConsumerLocation extends Thread
 		}
 	}
 
+	public void deleteAll()
+	{
+		queue.clear();
+	}
 	
 }

@@ -15,7 +15,9 @@ import android.util.Log;
 
 import com.example.locationapp.GpsTracking.GPSTracker;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.Utils;
+import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
 import com.example.locationapp.http.RequestParams.RequestBuilder;
 import com.example.locationapp.http.StringLocEntity.ProgressListener;
@@ -49,6 +51,16 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 		try
 		{
 			File file = new File(filePath);
+			
+			//defensive check
+			
+			if(!file.exists())
+			{
+				Log.d("UploadPhoto","File does not exists");
+				LocationDB.getInstance().deleteFromPhotoTable(filePath);
+				ConsumerForEverythingElse.getInstance().removeFromQueue(UploadPhotoTask.this);
+				return;
+			}
 			Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 			byte[] arr = Utils.bitmapToBytes(bitmap, CompressFormat.JPEG, 75);
 			String encodedImage = Base64.encodeToString(arr, Base64.DEFAULT);
@@ -74,13 +86,15 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 				public void onSuccess(String response)
 				{
 					Log.d("UploadPhotoSuccess", response + "Time Taken" + (System.currentTimeMillis() - startTime) / 1000 + "");
-
+					LocationDB.getInstance().deleteFromPhotoTable(filePath);
+					ConsumerForEverythingElse.getInstance().removeFromQueue(UploadPhotoTask.this);
+					
 				}
 
 				@Override
 				public void onFailure(int i)
 				{
-
+					ConsumerForEverythingElse.getInstance().toggleNetworkState();
 				}
 			});
 		}

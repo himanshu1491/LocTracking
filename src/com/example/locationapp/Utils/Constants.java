@@ -118,6 +118,14 @@ public class Constants
 		public static final String GEOFENCE_DEALER_ID = "geoFenceDealerID";
 
 		public static final String GEOFENCE_STATUS = "geofenceEntered";
+		
+		public static final String PHOTO_TABLE="photoTable";
+		
+		public static final String PHOTO_DEALER_ID="dealerId";
+		
+		public static final String PHOTO_POD_TYPE="podType";
+		
+		public static final String PHOTO_FILE_PATH="filePath";
 	}
 	
 	public static final class GEOFENCESTATUS
@@ -125,6 +133,9 @@ public class Constants
 		public static final int GEOFENCE_NOTENTERED = 0;
 
 		public static final int GEOFENCE_ENTERED = 1;
+		
+		public static final int GEOFENCE_ENTERED_SERVER_SEND=2;
+		
 	}
 	
 

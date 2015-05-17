@@ -20,6 +20,7 @@ import android.view.MenuItem;
 
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.Utils.Utils;
@@ -27,6 +28,7 @@ import com.example.locationapp.data.Dealer;
 import com.example.locationapp.data.Dealer.DealerState;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.UploadPhotoTask;
+import com.google.android.gms.location.LocationClient;
 
 public class LocationActivity extends ActionBarActivity
 {
@@ -42,7 +44,7 @@ public class LocationActivity extends ActionBarActivity
 
 	private String dealerId;
 
-	String PODType = null;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -131,7 +133,7 @@ public class LocationActivity extends ActionBarActivity
 			}
 			dealerId = cameraData.optString(Constants.DEALER_ID, "");
 			Log.d(this.getClass().getName(), "Dealer ID is " + dealerId);
-			PODType = cameraData.optString(Constants.POD_TYPE);
+			final String PODType   = cameraData.optString(Constants.POD_TYPE);
 			if (resultCode == Activity.RESULT_OK)
 			{
 				String filePath = prefs.getData(Constants.FILE_PATH_CAMERA, null);
@@ -142,12 +144,12 @@ public class LocationActivity extends ActionBarActivity
 
 					if ((file != null) && (file.exists()))
 					{
-						File destinationFile = Utils.createNewFile("cam_compress");
+						final File destinationFile = Utils.createNewFile("cam_compress");
 						prefs.saveData(Constants.FILE_PATH_CAMERA_COMPRESS, destinationFile.toString());
 						Utils.compressImage(filePath, destinationFile.toString());
 						file.delete();
 
-						LocationThreadPoolExecutor.getInstance().execute(new UploadPhotoTask(PODType, dealerId, destinationFile.toString()));
+						ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PODType, dealerId, destinationFile.toString()));
 						final Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
 						if (dealer != null)
 						{
@@ -162,7 +164,7 @@ public class LocationActivity extends ActionBarActivity
 								public void run()
 								{
 									LocationDB.getInstance().insertIntoDealerTable(dealer);
-
+									LocationDB.getInstance().insertIntoPhotoTable(destinationFile.toString(), PODType, dealer.getId());
 								}
 							});
 

@@ -24,6 +24,7 @@ import com.example.locationapp.GpsTracking.GeoLocationStore;
 import com.example.locationapp.GpsTracking.ILocationCallback;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
@@ -69,11 +70,12 @@ public class LocationService extends Service implements ILocationCallback
 		mGeoFenceManager = GeoFenceManager.getInstance();
 		gpsTracker = GPSTracker.getInstance();
 		gpsTracker.addListener(this);
-		String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
+		//String dealerdetails = prefs.getData(Constants.DEALER_DETAILS, "");
 
 		if (LocationSharedPreference.getInstance().getData(Constants.SYSTEM_ON,false))
 		{
 			ConsumerLocation.getInstance().start();
+			ConsumerForEverythingElse.getInstance().start();
 			gpsTracker.startTracking();
 			LocationThreadPoolExecutor.getInstance().execute(new Runnable()
 			{
@@ -82,6 +84,8 @@ public class LocationService extends Service implements ILocationCallback
 				public void run()
 				{
 					LocationDB.getInstance().fetchAllLocationAndSendToServer();
+					LocationDB.getInstance().fetchAllGeofencesAndSendToServer();
+					LocationDB.getInstance().fetchAllPhotosAndSendToServer();
 				}
 			});
 		}
@@ -146,7 +150,7 @@ public class LocationService extends Service implements ILocationCallback
 		}
 		else
 		{
-			List<GeoLocationStore> list = LocationDB.getInstance().getAllGeofences();
+			List<GeoLocationStore> list = LocationDB.getInstance().getAllGeofencesWhichNotEntered();
 			if (list == null || list.isEmpty())
 			{
 				return;
@@ -213,15 +217,24 @@ public class LocationService extends Service implements ILocationCallback
 			LocationSharedPreference.getInstance().saveData(Constants.SYSTEM_ON, false);
 			LocationSharedPreference.getInstance().saveData(Constants.DEALER_DETAILS, intent.getStringExtra("message"));
 		
-			LocationApp.getInstance().clearDealerData();
-			LocationDB.getInstance().deleteAll();
-			mGeoFenceManager.removeAllGeofence();
+			clearAllApplicationData();
 			gpsTracker.stopTracking();
 			insertIntoDealerDB(intent.getStringExtra("message"));
 			LocationApp.getInstance().fillDealerMap();
 			context.sendBroadcast(new Intent(Constants.REFRESH_DEALER_DATA));
 			startTracking();
 
+		}
+
+		private void clearAllApplicationData()
+		{
+			LocationApp.getInstance().clearDealerData();
+			LocationDB.getInstance().deleteAll();
+			mGeoFenceManager.removeAllGeofence();
+			//ConsumerForEverythingElse.getInstance().deleteAll();
+			//ConsumerLocation.getInstance().deleteAll();
+			
+			
 		}
 	};
 
