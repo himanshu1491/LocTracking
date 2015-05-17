@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <permission
         android:name="com.example.actionbarsetup.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -64,6 +64,14 @@
 
         <service android:name="com.example.locationapp.GpsTracking.GeofenceTransitionsIntentService" >
         </service>
+        
+        <receiver
+            android:name="com.example.locationapp.services.ConnectionChangeReceiver"
+            android:label="NetworkConnection" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
