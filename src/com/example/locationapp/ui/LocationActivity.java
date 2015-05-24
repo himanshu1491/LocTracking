@@ -149,8 +149,9 @@ public class LocationActivity extends ActionBarActivity
 						Utils.compressImage(filePath, destinationFile.toString());
 						file.delete();
 
-						ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PODType, dealerId, destinationFile.toString()));
 						final Dealer dealer = LocationApp.getInstance().getDealerDetails(dealerId);
+						ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PODType, dealerId, destinationFile.toString(),dealer.getGrID()));
+						
 						if (dealer != null)
 						{
 							dealer.setState(DealerState.POD_COLLECTED);
@@ -164,7 +165,7 @@ public class LocationActivity extends ActionBarActivity
 								public void run()
 								{
 									LocationDB.getInstance().insertIntoDealerTable(dealer);
-									LocationDB.getInstance().insertIntoPhotoTable(destinationFile.toString(), PODType, dealer.getId());
+									LocationDB.getInstance().insertIntoPhotoTable(destinationFile.toString(), PODType, dealer.getId(),dealer.getGrID());
 								}
 							});
 

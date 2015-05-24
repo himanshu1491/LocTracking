@@ -15,7 +15,9 @@ import android.util.Log;
 
 import com.example.locationapp.GpsTracking.GPSTracker;
 import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.Constants.PODTYPE;
 import com.example.locationapp.Utils.ConsumerForEverythingElse;
+import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
@@ -31,12 +33,16 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 	
 	String PodType;
 	
+	String grId;
+	
+	String encodedImage="";
 
-	public UploadPhotoTask( String PodType,String dealerId,String filePath)
+	public UploadPhotoTask( String PodType,String dealerId,String filePath,String grID)
 	{
 		this.dealerId = dealerId;
 		this.filePath=filePath;
 		this.PodType=PodType;
+		this.grId=grID;
 	}
 
 	@Override
@@ -50,6 +56,8 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 		final Long startTime = System.currentTimeMillis();
 		try
 		{
+			if(PODTYPE.POD_REJECTED!=PodType)
+			{
 			File file = new File(filePath);
 			
 			//defensive check
@@ -63,11 +71,13 @@ public class UploadPhotoTask implements Runnable, ProgressListener
 			}
 			Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 			byte[] arr = Utils.bitmapToBytes(bitmap, CompressFormat.JPEG, 75);
-			String encodedImage = Base64.encodeToString(arr, Base64.DEFAULT);
+			encodedImage = Base64.encodeToString(arr, Base64.DEFAULT);
+			}
 			JSONObject body = new JSONObject();
 			body.put(Constants.DEALER_ID, dealerId);
 			body.put("img", encodedImage);
 			body.put(Constants.POD_TYPE, PodType);
+			body.put(Constants.GRID, grId);
 			Location location=GPSTracker.getInstance().getLastKnownLocation();
 			Log.d("locattt",location+"");
 			if(location!=null)

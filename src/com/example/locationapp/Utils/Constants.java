@@ -16,6 +16,8 @@ public class Constants
 
 	public static String AUTH_TOKEN = "AuthToken";
 
+	public static String GRID = "grId";
+
 	public static final int REQUESTCODE_CAMERA = 3;
 
 	public static final String FILE_PATH_CAMERA = "filepathcamera";
@@ -53,7 +55,7 @@ public class Constants
 	public static final String DEALER_ID = "consigneeId";
 
 	public static final int DEALER_RADIUS_VALUE = 100;
-	
+
 	public static final String DEALER_RADIUS = "radius";
 
 	public static final String DEALER_POD_STATUS = "podStatus";
@@ -66,9 +68,11 @@ public class Constants
 
 	public static final class PODTYPE
 	{
-		public static final String POD_PARTIAL = "partial";
+		public static final String POD_PARTIAL = "2";
 
-		public static final String POD_FULL = "full";
+		public static final String POD_FULL = "1";
+		
+		public static final String POD_REJECTED="3";
 	}
 
 	public static final String LOCATION = "location";
@@ -77,7 +81,9 @@ public class Constants
 
 	public static final String SYSTEM_ON = "systemOn";
 
-	
+	public static final String LOCATION_SYNC_TIME = "syncTime";
+
+	public static final int LOCATION_INTERVAL = 5;
 
 	public static final class DatabaseConstants
 	{
@@ -92,8 +98,8 @@ public class Constants
 		public static final String _ID = "_id";
 
 		public static final String DEALER_DATA = "data";
-		
-		public static final String DEALER_STATUS="dealerStatus";
+
+		public static final String DEALER_STATUS = "dealerStatus";
 
 		public static final String LOCATION_TABLE = "location";
 
@@ -118,26 +124,40 @@ public class Constants
 		public static final String GEOFENCE_DEALER_ID = "geoFenceDealerID";
 
 		public static final String GEOFENCE_STATUS = "geofenceEntered";
-		
-		public static final String PHOTO_TABLE="photoTable";
-		
-		public static final String PHOTO_DEALER_ID="dealerId";
-		
-		public static final String PHOTO_POD_TYPE="podType";
-		
-		public static final String PHOTO_FILE_PATH="filePath";
+
+		public static final String PHOTO_TABLE = "photoTable";
+
+		public static final String PHOTO_DEALER_ID = "dealerId";
+
+		public static final String PHOTO_POD_TYPE = "podType";
+
+		public static final String PHOTO_FILE_PATH = "filePath";
+
+		public static final String PHOTO_GR_ID = "grID";
+
 	}
-	
+
 	public static final class GEOFENCESTATUS
 	{
 		public static final int GEOFENCE_NOTENTERED = 0;
 
 		public static final int GEOFENCE_ENTERED = 1;
-		
-		public static final int GEOFENCE_ENTERED_SERVER_SEND=2;
-		
-	}
-	
 
+		public static final int GEOFENCE_ENTERED_SERVER_SEND = 2;
+
+	}
+
+	public static final class Mylocation
+	{
+		public static final String SPEED = "speed";
+
+		public static final String LATITUTE = "lat";
+
+		public static final String LONGITUTE = "lng";
+
+		public static final String ACCURACY = "accuracy";
+
+		public static final String ALTITUTE = "altitute";
+	}
 
 }

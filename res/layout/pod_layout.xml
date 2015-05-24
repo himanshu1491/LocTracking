@@ -3,20 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="40dp"
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/fullPod"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:text="FULL POD" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
+        <Button
+            android:id="@+id/fullPod"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="FULL POD" />
+
+        <Button
+            android:id="@+id/HalfPod"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="HALF POD" />
+    </LinearLayout>
+    
     <Button
-        android:id="@+id/HalfPod"
-        android:layout_width="0dp"
+        android:id="@+id/rejectPod"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="HALF POD" />
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
+        android:text="REJECTED" />
 
 </LinearLayout>

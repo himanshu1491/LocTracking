@@ -77,6 +77,7 @@ public class GeoFenceManager
 
 	public Geofence getGeoFence(GeoLocationStore store)
 	{
+		Log.d("geofences",store.getRadius()+"");
 		Geofence geofence = new Geofence.Builder().setCircularRegion(store.getLat(), store.getLng(), store.getRadius()).setTransitionTypes(store.getTransitionType())
 				.setRequestId(store.getRequestId()).setExpirationDuration(store.getExpirationDuration()).setLoiteringDelay(30*1000).build();
 		return geofence;

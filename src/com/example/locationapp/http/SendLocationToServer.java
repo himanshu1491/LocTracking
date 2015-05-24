@@ -8,16 +8,17 @@ import android.util.Log;
 
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.ConsumerLocation;
+import com.example.locationapp.data.MyLocation;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
 import com.example.locationapp.http.RequestParams.RequestBuilder;
 
 public class SendLocationToServer implements Runnable
 {
-	private Location location;
+	private MyLocation location;
 	public  long timeStamp;
 
-	public SendLocationToServer(Location loc,long timeStamp)
+	public SendLocationToServer(MyLocation loc,long timeStamp)
 	{
 		this.location = loc;
 		this.timeStamp=timeStamp;
@@ -31,7 +32,7 @@ public class SendLocationToServer implements Runnable
 		JSONObject body = new JSONObject();
 		try
 		{
-			body.put(Constants.LOCATION, location.getLatitude() + "," + location.getLongitude());
+			body.put(Constants.LOCATION, location.toJsonString());
 			body.put(Constants.STS, timeStamp);
 
 			StringEntity entity = new StringEntity(body.toString());

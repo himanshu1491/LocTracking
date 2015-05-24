@@ -29,6 +29,7 @@ import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.LocationThreadPoolExecutor;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.data.MyLocation;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.SendLocationToServer;
 import com.example.locationapp.ui.LocationApp;
@@ -124,7 +125,7 @@ public class LocationService extends Service implements ILocationCallback
 				JSONObject object = new JSONObject(dealerdetails);
 
 				JSONArray array = object.getJSONArray(Constants.DEALER_DETAILS);
-				
+				prefs.saveData(Constants.LOCATION_SYNC_TIME,object.optInt(Constants.LOCATION_SYNC_TIME, Constants.LOCATION_INTERVAL));
 				JSONObject dealer = null;
 				list=new ArrayList<GeoLocationStore>(array.length());
 				for (int i = 0; i < array.length(); i++)
@@ -192,7 +193,7 @@ public class LocationService extends Service implements ILocationCallback
 	@Override
 	public void onLocationChanged(final Location location)
 	{
-		Log.i(TAG, "Location Changed" + location.toString() + location.getProvider());
+		
 	
 		//inserting into DB first;
 		LocationThreadPoolExecutor.getInstance().execute(new Runnable()
@@ -201,8 +202,8 @@ public class LocationService extends Service implements ILocationCallback
 			@Override
 			public void run()
 			{
-				LocationDB.getInstance().insertIntoLocationTable(location);
-				ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(location, System.currentTimeMillis() / 1000));
+				LocationDB.getInstance().insertIntoLocationTable(new MyLocation(location));
+				ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(new MyLocation(location), System.currentTimeMillis() / 1000));
 			}
 		});
 		

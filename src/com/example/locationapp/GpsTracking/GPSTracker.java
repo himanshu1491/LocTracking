@@ -7,6 +7,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.locationapp.Utils.Constants;
+import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.ui.LocationApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +28,8 @@ public class GPSTracker implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 	static ArrayList<ILocationCallback> listeners = new ArrayList<ILocationCallback>();
 
 	public static final GPSTracker gpsTracter = new GPSTracker();
+	
+	LocationSharedPreference prefs=LocationSharedPreference.getInstance();
 
 	
 
@@ -54,8 +58,8 @@ public class GPSTracker implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 		Collections.synchronizedCollection(listeners);
 		mGoogleApiClient = new GoogleApiClient.Builder(LocationApp.getInstance().getApplicationContext()).addConnectionCallbacks(this).addOnConnectionFailedListener(this)
 				.addApi(LocationServices.API).build();
-		mLocationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(5 * 1000) // 1 seconds, in milliseconds
-				.setFastestInterval(5 * 1000);
+		mLocationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(prefs.getData(Constants.LOCATION_SYNC_TIME,Constants.LOCATION_INTERVAL)*1000) // 1 seconds, in milliseconds
+				.setFastestInterval(prefs.getData(Constants.LOCATION_SYNC_TIME,Constants.LOCATION_INTERVAL)*1000);
 	}
 
 	public void startTracking()

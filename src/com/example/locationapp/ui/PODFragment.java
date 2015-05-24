@@ -5,6 +5,7 @@ import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,13 +19,18 @@ import android.widget.Toast;
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.Constants.PODTYPE;
+import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.Utils.Utils;
+import com.example.locationapp.data.Dealer;
+import com.example.locationapp.data.Dealer.DealerState;
+import com.example.locationapp.database.LocationDB;
+import com.example.locationapp.http.UploadPhotoTask;
 
 public class PODFragment extends Fragment implements OnClickListener
 {
 
-	Button fullPodButton, halfPodButton;
+	Button fullPodButton, halfPodButton,rejectedPodButton;
 
 	Intent in = null;
 
@@ -52,19 +58,20 @@ public class PODFragment extends Fragment implements OnClickListener
 		listeners();
 		LocationActivity activity = (LocationActivity) getActivity();
 		activity.enableUpButton(true);
-
 	}
 
 	private void bindViews()
 	{
 		halfPodButton = (Button) getView().findViewById(R.id.HalfPod);
 		fullPodButton = (Button) getView().findViewById(R.id.fullPod);
+		rejectedPodButton=(Button)getView().findViewById(R.id.rejectPod);
 	}
 
 	private void listeners()
 	{
 		halfPodButton.setOnClickListener(this);
 		fullPodButton.setOnClickListener(this);
+		rejectedPodButton.setOnClickListener(this);
 	}
 
 	@Override
@@ -117,6 +124,16 @@ public class PODFragment extends Fragment implements OnClickListener
 			prefs.saveData(Constants.DEALER_ID_UPLOAD_POD, data.toString());
 			prefs.saveData(Constants.FILE_PATH_CAMERA, file.toString());
 			getActivity().startActivityForResult(in, Constants.REQUESTCODE_CAMERA);
+			break;
+			
+		case R.id.rejectPod:
+			Dealer d=LocationApp.getInstance().getDealerDetails(dealerId);
+			d.setState(DealerState.POD_COLLECTED);
+			LocationApp.getInstance().putDealerDetailsInMap(d);
+			
+			LocationDB.getInstance().insertIntoPhotoTable("", PODTYPE.POD_REJECTED, dealerId, d.getGrID());
+			ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PODTYPE.POD_REJECTED, dealerId, null, d.getGrID()));
+			getActivity().getSupportFragmentManager().popBackStack();
 			break;
 		}
 	}

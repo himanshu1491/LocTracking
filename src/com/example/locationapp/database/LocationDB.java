@@ -23,6 +23,7 @@ import com.example.locationapp.Utils.Constants.GEOFENCESTATUS;
 import com.example.locationapp.Utils.ConsumerForEverythingElse;
 import com.example.locationapp.Utils.ConsumerLocation;
 import com.example.locationapp.data.Dealer;
+import com.example.locationapp.data.MyLocation;
 import com.example.locationapp.http.NotifyDealer;
 import com.example.locationapp.http.SendLocationToServer;
 import com.example.locationapp.http.UploadPhotoTask;
@@ -60,7 +61,7 @@ public class LocationDB extends SQLiteOpenHelper
 
 	@Override
 	public void onCreate(SQLiteDatabase db)
-	{
+	{	
 		mmDb = db;
 		String sql = DatabaseConstants.CREATE_TABLE +  DatabaseConstants.DEALER_TABLE  +  " ( "  + _ID + " PRIMARY KEY ," + DEALER_DATA + " TEXT "   +  ")" ;
 		mmDb.execSQL(sql);
@@ -76,7 +77,7 @@ public class LocationDB extends SQLiteOpenHelper
 			+" ) ";
 		mmDb.execSQL(sql);
 		sql=DatabaseConstants.CREATE_TABLE + DatabaseConstants.PHOTO_TABLE +" ( "+ DatabaseConstants.PHOTO_FILE_PATH+ " STRING PRIMARY KEY, " + DatabaseConstants.PHOTO_DEALER_ID + " STRING ,"
-				+ DatabaseConstants.PHOTO_POD_TYPE + " STRING , " + DatabaseConstants.STS+ " STRING " + ")";
+				+ DatabaseConstants.PHOTO_POD_TYPE + " STRING , " + DatabaseConstants.STS+ " STRING ," + Constants.GRID + " STRING "+ ")";
 		mmDb.execSQL(sql);
 	}
 
@@ -135,19 +136,19 @@ public class LocationDB extends SQLiteOpenHelper
 		Log.d(TAG,"deletion  form  Dealer table total rows  "+val+"");
 	}
 	
-	public void insertIntoLocationTable(Location loc)
+	public void insertIntoLocationTable(MyLocation loc)
 	{
 		ContentValues cv = new ContentValues();
-		cv.put(DatabaseConstants.LOCATION_COORDINATE, loc.getLatitude() + "," + loc.getLongitude() + "");
+		cv.put(DatabaseConstants.LOCATION_COORDINATE, loc.toJsonString());
 		cv.put(DatabaseConstants.STS, System.currentTimeMillis() / 1000);
 		cv.put(DatabaseConstants.LOCATION_SERVER_SYNCED_STATUS, 0);
 		long val=mmDb.insertWithOnConflict(DatabaseConstants.LOCATION_TABLE, null, cv,SQLiteDatabase.CONFLICT_REPLACE);
 		Log.d(TAG,"insert into Location table with row id "+val+"");
 	}
 	
-	public void deleteFromLocationTable(Location loc)
+	public void deleteFromLocationTable(MyLocation loc)
 	{
-		String cordicate = loc.getLatitude() + "," + loc.getLongitude() + "";
+		String cordicate = loc.toJsonString();
 		long val=mmDb.delete(DatabaseConstants.LOCATION_TABLE, DatabaseConstants.LOCATION_COORDINATE + "=  ?", new String[] { cordicate });
 		Log.d(TAG,"delete form location table with val" + val+"");
 	}
@@ -269,13 +270,9 @@ public class LocationDB extends SQLiteOpenHelper
 			{
 				do
 				{
-					Location location = new Location("GPS");
-					double lat = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DatabaseConstants.LOCATION_COORDINATE)).split(",")[0]);
-					double lng = Double.parseDouble(cursor.getString(cursor.getColumnIndex(DatabaseConstants.LOCATION_COORDINATE)).split(",")[1]);
-					location.setLatitude(lat);
-					location.setLongitude(lng);
+					JSONObject loc=new JSONObject(cursor.getString(cursor.getColumnIndex(DatabaseConstants.LOCATION_COORDINATE)));
 					long sts = Long.parseLong(cursor.getString(cursor.getColumnIndex(DatabaseConstants.STS)));
-					ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(location, sts));
+					ConsumerLocation.getInstance().addToQueue(new SendLocationToServer(new MyLocation(loc), sts));
 				}
 				while (cursor.moveToNext());
 			}
@@ -299,8 +296,8 @@ public class LocationDB extends SQLiteOpenHelper
 					String PodType = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_POD_TYPE));
 					String dealerId = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_DEALER_ID));
 					String filePath = cursor.getString(cursor.getColumnIndex(DatabaseConstants.PHOTO_FILE_PATH));
-
-					ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PodType, dealerId, filePath));
+					String grId=cursor.getString(cursor.getColumnIndex(Constants.GRID));
+					ConsumerForEverythingElse.getInstance().addToQueue(new UploadPhotoTask(PodType, dealerId, filePath,grId));
 				}
 				while (cursor.moveToNext());
 			}
@@ -312,13 +309,14 @@ public class LocationDB extends SQLiteOpenHelper
 	}
 
 	
-	public  void insertIntoPhotoTable(String FilePath,String PodType,String dealerID)
+	public  void insertIntoPhotoTable(String FilePath,String PodType,String dealerID,String grId)
 	{
 		ContentValues cv=new ContentValues();
 		cv.put(DatabaseConstants.PHOTO_DEALER_ID, dealerID);
 		cv.put(DatabaseConstants.PHOTO_FILE_PATH, FilePath);
 		cv.put(DatabaseConstants.PHOTO_POD_TYPE, PodType);
 		cv.put(DatabaseConstants.STS, System.currentTimeMillis()/1000);
+		cv.put(DatabaseConstants.PHOTO_GR_ID, grId);
 		long val=mmDb.insertWithOnConflict(DatabaseConstants.PHOTO_TABLE,null, cv,SQLiteDatabase.CONFLICT_REPLACE);
 		Log.d(TAG,"inserted into Photo Table with id"+val);
 	}

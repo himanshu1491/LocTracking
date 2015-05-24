@@ -18,6 +18,8 @@ public class Dealer
 	private String address;
 
 	private int state = DealerState.NORMAL;
+	
+	private String grID="";
 
 	/**
 	 * @param name
@@ -25,12 +27,13 @@ public class Dealer
 	 * @param coordinateLng
 	 * @param id
 	 */
-	public Dealer(String name, Double coordinateLat, Double coordinateLng, String id, String address)
+	public Dealer(String name, Double coordinateLat, Double coordinateLng, String id, String address,String grId)
 	{
 		this.name = name;
 		this.coordinateLat = coordinateLat;
 		this.coordinateLng = coordinateLng;
 		this.Id = id;
+		this.grID=grId;
 		this.setAddress(address);
 	}
 
@@ -45,6 +48,7 @@ public class Dealer
 			this.setAddress(dealer.getString(Constants.DEALER_ADD));
 			this.Id = dealer.getString(Constants.DEALER_ID);
 			this.state=dealer.optInt(Constants.DEALER_POD_STATUS,DealerState.NORMAL);
+			this.grID=dealer.optString(Constants.GRID,"");
 
 		}
 		catch (JSONException e)
@@ -175,6 +179,7 @@ public class Dealer
 			object.put(Constants.DEALER_ADD, address);
 			object.put(Constants.DEALER_LOC, coordinateLat+","+coordinateLng+"");
 			object.put(Constants.DEALER_POD_STATUS, state);
+			object.put(Constants.GRID, grID);
 		}
 		catch (JSONException e)
 		{
@@ -182,5 +187,10 @@ public class Dealer
 		}
 		return object.toString();
 		
+	}
+	
+	public String getGrID()
+	{
+		return grID;
 	}
 }

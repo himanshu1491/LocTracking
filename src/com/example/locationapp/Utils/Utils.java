@@ -138,7 +138,7 @@ public class Utils
 
 		for (int i = 0; i < 5; i++)
 		{
-			dealerdata.add(new Dealer("Hi>>>" + i + "", 23.56, 77.35, "234", "gurgoan"));
+			//dealerdata.add(new Dealer("Hi>>>" + i + "", 23.56, 77.35, "234", "gurgoan"));
 		}
 		return dealerdata;
 	}
