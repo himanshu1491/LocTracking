@@ -41,11 +41,14 @@ public class HTTPManager
 			{
 				Log.w(TAG, "Request Failed: " + res.getStatusLine());
 				response.onFailure(res.getStatusLine().getStatusCode());
-				return;
+			
 			}
-			String responseFromServer=EntityUtils.toString(res.getEntity());
-			response.onSuccess(responseFromServer);
-			Log.d(TAG, "SUCESS " + responseFromServer);
+			else
+			{
+				String responseFromServer = EntityUtils.toString(res.getEntity());
+				response.onSuccess(responseFromServer);
+				Log.d(TAG, "SUCESS " + responseFromServer);
+			}
 		}
 		catch (ClientProtocolException e)
 		{

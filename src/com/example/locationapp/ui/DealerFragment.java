@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,11 +18,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.actionbarsetup.R;
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.LocationSharedPreference;
+import com.example.locationapp.Utils.Utils;
 import com.example.locationapp.adapter.DealerAdapter;
 import com.example.locationapp.data.Dealer;
 import com.example.locationapp.data.Dealer.DealerState;
@@ -30,6 +33,8 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 {
 
 	ListView listView;
+	
+	TextView versionName;
 
 	ArrayList<Dealer> dealerData = new ArrayList<Dealer>();
 
@@ -56,12 +61,24 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 		listView.setAdapter(adapter);
 		LocationActivity activity=(LocationActivity) getActivity();
 		activity.enableUpButton(false);
-
+		
 	}
 
 	private void bindViews()
 	{
 		listView = (ListView) getView().findViewById(R.id.list);
+		versionName=(TextView)getView().findViewById(R.id.versionName);
+		try
+		{
+			String verName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
+			versionName.setText(verName);
+		}
+		catch (NameNotFoundException e)
+		{
+			
+			e.printStackTrace();
+		}
+
 	}
 
 	private void bindListeners()
@@ -76,7 +93,7 @@ public class DealerFragment extends Fragment implements OnItemClickListener
 
 		if (dealerData.get(position).getState() == DealerState.POD_COLLECTED)
 		{
-			Toast.makeText(getActivity(), "POD has already been collected", Toast.LENGTH_LONG).show();
+			Toast.makeText(getActivity(), "POD has already been collected", Toast.LENGTH_SHORT).show();
 		}
 		else
 		{

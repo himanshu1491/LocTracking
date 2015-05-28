@@ -75,21 +75,41 @@ public class LocationService extends Service implements ILocationCallback
 
 		if (LocationSharedPreference.getInstance().getData(Constants.SYSTEM_ON,false))
 		{
-			ConsumerLocation.getInstance().start();
-			ConsumerForEverythingElse.getInstance().start();
-			gpsTracker.startTracking();
-			LocationThreadPoolExecutor.getInstance().execute(new Runnable()
-			{
-				
-				@Override
-				public void run()
-				{
-					LocationDB.getInstance().fetchAllLocationAndSendToServer();
-					LocationDB.getInstance().fetchAllGeofencesAndSendToServer();
-					LocationDB.getInstance().fetchAllPhotosAndSendToServer();
-				}
-			});
+			startThreadsAndTracking();
+			fetchDataFromDB();
 		}
+	}
+
+	private void fetchDataFromDB()
+	{
+		LocationThreadPoolExecutor.getInstance().execute(new Runnable()
+		{
+			
+			@Override
+			public void run()
+			{
+				LocationDB.getInstance().fetchAllLocationAndSendToServer();
+				LocationDB.getInstance().fetchAllGeofencesAndSendToServer();
+				LocationDB.getInstance().fetchAllPhotosAndSendToServer();
+			}
+		});
+		
+	}
+
+	private void startThreadsAndTracking()
+	{
+		if(!ConsumerLocation.getInstance().isAlive())
+		{
+			
+		ConsumerLocation.getInstance().start();
+		}
+		if(!ConsumerForEverythingElse.getInstance().isAlive())
+		{
+			ConsumerForEverythingElse.getInstance().start();
+		}
+		gpsTracker.startTracking();
+		
+		
 	}
 
 	private void startTracking()
@@ -223,14 +243,14 @@ public class LocationService extends Service implements ILocationCallback
 			insertIntoDealerDB(intent.getStringExtra("message"));
 			LocationApp.getInstance().fillDealerMap();
 			context.sendBroadcast(new Intent(Constants.REFRESH_DEALER_DATA));
-			startTracking();
+			startThreadsAndTracking();
 
 		}
 
 		private void clearAllApplicationData()
 		{
 			LocationApp.getInstance().clearDealerData();
-			LocationDB.getInstance().deleteAll();
+			//LocationDB.getInstance().deleteAll();
 			mGeoFenceManager.removeAllGeofence();
 			//ConsumerForEverythingElse.getInstance().deleteAll();
 			//ConsumerLocation.getInstance().deleteAll();

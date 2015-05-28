@@ -73,7 +73,7 @@ public class DealerAdapter extends BaseAdapter
 		switch (dealerData.get(position).getState())
 		{
 		case DealerState.NORMAL:
-			holder.imgView.setBackground(context.getResources().getDrawable(R.drawable.grey));
+			holder.imgView.setBackgroundResource(R.drawable.grey);
 			break;
 		case DealerState.WITHIN_RADIUS:
 			holder.imgView.setBackground(context.getResources().getDrawable(R.drawable.yellow));

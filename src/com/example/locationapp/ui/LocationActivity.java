@@ -28,6 +28,7 @@ import com.example.locationapp.data.Dealer;
 import com.example.locationapp.data.Dealer.DealerState;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.UploadPhotoTask;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
 public class LocationActivity extends ActionBarActivity
@@ -106,12 +107,26 @@ public class LocationActivity extends ActionBarActivity
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getMenuInflater().inflate(R.menu.main, menu);
+		if(!Utils.isLollipopOrHigher())
+		{
+			menu.removeItem(R.id.action_screen_pinning);
+		}
+		
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+		switch(item.getItemId())
+		{
+		case R.id.action_screen_pinning:
+			if (Utils.isLollipopOrHigher())
+			{
+				startLockTask();
+			}
+			break;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 

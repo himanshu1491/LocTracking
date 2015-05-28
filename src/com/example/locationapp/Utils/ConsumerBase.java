@@ -57,6 +57,7 @@ public abstract class ConsumerBase<T extends Runnable> extends Thread
 			
 			synchronized (ConsumerBase.this)
 			{
+					Log.d(TAG,"calling notify");
 					notify();
 			}			
 		}
