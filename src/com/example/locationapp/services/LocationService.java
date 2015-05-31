@@ -252,6 +252,7 @@ public class LocationService extends Service implements ILocationCallback
 			LocationApp.getInstance().clearDealerData();
 			//LocationDB.getInstance().deleteAll();
 			mGeoFenceManager.removeAllGeofence();
+			LocationDB.getInstance().deleteAllDealerData();
 			//ConsumerForEverythingElse.getInstance().deleteAll();
 			//ConsumerLocation.getInstance().deleteAll();
 			

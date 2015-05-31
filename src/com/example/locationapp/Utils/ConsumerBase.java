@@ -55,16 +55,18 @@ public abstract class ConsumerBase<T extends Runnable> extends Thread
 		{
 			isNetworkAvalable.set(true);
 			
-			synchronized (ConsumerBase.this)
-			{
-					Log.d(TAG,"calling notify");
-					notify();
-			}			
+				
 		}
 		else
 		{
 			isNetworkAvalable.set(false);
 		}
+		
+		synchronized (ConsumerBase.this)
+		{
+			Log.d(TAG, "calling notify");
+			notify();
+		}	
 	}
 	
 	@Override

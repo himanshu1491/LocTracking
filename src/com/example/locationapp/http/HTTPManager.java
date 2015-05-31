@@ -1,6 +1,7 @@
 package com.example.locationapp.http;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -8,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 
 import android.util.Log;
@@ -37,11 +39,12 @@ public class HTTPManager
 		try
 		{
 			res = client.execute(post);
+			Log.d("ABC",client.getParams().getParameter(CoreConnectionPNames.CONNECTION_TIMEOUT)+"");
+			Log.d("ABC",client.getParams().getParameter(CoreConnectionPNames.SO_TIMEOUT)+"");
 			if (res.getStatusLine().getStatusCode() != 200)
 			{
 				Log.w(TAG, "Request Failed: " + res.getStatusLine());
 				response.onFailure(res.getStatusLine().getStatusCode());
-			
 			}
 			else
 			{
@@ -52,13 +55,19 @@ public class HTTPManager
 		}
 		catch (ClientProtocolException e)
 		{
-			Log.d(TAG, "Failed " + e);
+			Log.d(TAG, "Failed  Client Protocaol Exception" + e);
 			e.printStackTrace();
 			response.onFailure(1);
 		}
+		catch (SocketTimeoutException e)
+		{
+			Log.d(TAG, "Failed Socket TimeOut" + e);
+			response.onFailure(1);
+			e.printStackTrace();
+		}
 		catch (IOException e)
 		{
-			Log.d(TAG, "Failed " + e);
+			Log.d(TAG, "Failed IO Exception " + e);
 			response.onFailure(1);
 			e.printStackTrace();
 		}

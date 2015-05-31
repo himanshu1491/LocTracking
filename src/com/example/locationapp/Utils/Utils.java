@@ -21,7 +21,9 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
@@ -60,16 +62,16 @@ public class Utils
 
 	public static synchronized HttpClient getClient()
 	{
-		if (client != null)
-		{
-			return client;
-		}
+		
 		// PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		// cm.setMaxTotal(10);
 
 		// client = HttpClients.custom().setConnectionManager(cm).setUserAgent( System.getProperty("http.agent")).build();
 		HttpParams params = new BasicHttpParams();
-
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpConnectionParams.setConnectionTimeout(params, Constants.CONNECT_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, Constants.SOCKET_TIMEOUT);
+		
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
 		HttpProtocolParams.setUseExpectContinue(params, true);
@@ -79,6 +81,8 @@ public class Utils
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		client = new DefaultHttpClient(cm, params);
 		client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, System.getProperty("http.agent"));
+		client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, Constants.SOCKET_TIMEOUT);
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, Constants.CONNECT_TIMEOUT);
 		return client;
 
 	}

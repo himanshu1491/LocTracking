@@ -65,6 +65,10 @@ public class Constants
 	public static final String REFRESH_DEALER_DATA = "refresh_dealer_data";
 
 	public static final String POD_TYPE = "podType";
+	
+	public static final int CONNECT_TIMEOUT = 6 * 1000;
+
+	public static final int SOCKET_TIMEOUT = 30 * 1000;
 
 	public static final class PODTYPE
 	{
