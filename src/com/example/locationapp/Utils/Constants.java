@@ -162,6 +162,8 @@ public class Constants
 		public static final String ACCURACY = "accuracy";
 
 		public static final String ALTITUTE = "altitute";
+		
+		public static final String BEARING = "bearing";
 	}
 
 }

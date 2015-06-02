@@ -33,6 +33,7 @@ public class SendLocationToServer implements Runnable
 		try
 		{
 			body.put(Constants.LOCATION, location.toJsonString());
+			Log.d("Location changed",location.toJsonString());
 			body.put(Constants.STS, timeStamp);
 
 			StringEntity entity = new StringEntity(body.toString());

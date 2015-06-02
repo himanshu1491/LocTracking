@@ -10,7 +10,7 @@ import android.location.Location;
 public class MyLocation
 {
 
-	String lat, lng, speed, altitute, accuracy;
+	String lat, lng, speed, altitute, accuracy,bearing;
 
 	public MyLocation(Location loc)
 	{
@@ -19,6 +19,7 @@ public class MyLocation
 		speed = loc.getSpeed() + "";
 		accuracy = loc.getAccuracy() + "";
 		altitute = loc.getAltitude() + "";
+		bearing=loc.getBearing()+"";
 	}
 
 	public MyLocation(JSONObject loc)
@@ -28,6 +29,7 @@ public class MyLocation
 		speed = loc.optString(Mylocation.SPEED);
 		altitute = loc.optString(Mylocation.ALTITUTE);
 		accuracy = loc.optString(Mylocation.ACCURACY);
+		bearing=loc.optString(Mylocation.BEARING);
 	}
 
 	public String toJsonString()
@@ -41,6 +43,7 @@ public class MyLocation
 			object.put(Mylocation.SPEED, speed);
 			object.put(Mylocation.ACCURACY, accuracy);
 			object.put(Mylocation.ALTITUTE, altitute);
+			object.put(Mylocation.BEARING, bearing);
 		}
 		catch (JSONException e)
 		{
