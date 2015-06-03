@@ -14,14 +14,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="FULL POD" />
+            android:text="Qualified POD" />
 
         <Button
             android:id="@+id/HalfPod"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="HALF POD" />
+            android:text="Non Qualified POD" />
     </LinearLayout>
     
     <Button
