@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.locationapp.Utils.Constants;
 import com.example.locationapp.Utils.ConsumerLocation;
+import com.example.locationapp.Utils.LocationSharedPreference;
 import com.example.locationapp.data.MyLocation;
 import com.example.locationapp.database.LocationDB;
 import com.example.locationapp.http.HTTPManager.IResponse;
@@ -33,9 +34,10 @@ public class SendLocationToServer implements Runnable
 		try
 		{
 			body.put(Constants.LOCATION, location.toJsonString());
-			Log.d("Location changed",location.toJsonString());
+			
 			body.put(Constants.STS, timeStamp);
-
+			body.put(Constants.GR_GROUP_ID, LocationSharedPreference.getInstance().getData(Constants.GR_GROUP_ID, ""));
+			Log.d("Location changed",body.toString());
 			StringEntity entity = new StringEntity(body.toString());
 
 			RequestParams params = new RequestBuilder().setEntity(entity).AddToken(true).setUrl(URL).build();

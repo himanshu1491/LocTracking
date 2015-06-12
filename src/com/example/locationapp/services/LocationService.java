@@ -146,6 +146,7 @@ public class LocationService extends Service implements ILocationCallback
 
 				JSONArray array = object.getJSONArray(Constants.DEALER_DETAILS);
 				prefs.saveData(Constants.LOCATION_SYNC_TIME,object.optInt(Constants.LOCATION_SYNC_TIME, Constants.LOCATION_INTERVAL));
+				prefs.saveData(Constants.GR_GROUP_ID, object.optString(Constants.GR_GROUP_ID, ""));
 				JSONObject dealer = null;
 				list=new ArrayList<GeoLocationStore>(array.length());
 				for (int i = 0; i < array.length(); i++)

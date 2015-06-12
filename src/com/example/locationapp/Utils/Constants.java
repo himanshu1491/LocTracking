@@ -89,6 +89,8 @@ public class Constants
 
 	public static final int LOCATION_INTERVAL = 5;
 
+	public static final String GR_GROUP_ID = "grGroupId";
+
 	public static final class DatabaseConstants
 	{
 		public static final String NAME = "DB_RTPORT";
