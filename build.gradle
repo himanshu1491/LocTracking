@@ -1,0 +1,55 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0+'
+    }
+}
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion "Google Inc.:Google APIs:21"
+    buildToolsVersion "21.0.2"
+    
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 17
+    }
+    lintOptions {
+        ignoreWarnings true
+        checkAllWarnings false
+        warningsAsErrors false
+        lintConfig file("lint.xml")
+        quiet true
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    dexOptions {
+    javaMaxHeapSize "2048M"
+    preDexLibraries = false
+        jumboMode = true
+    }
+    
+    dependencies {
+    compile 'com.google.android.gms:play-services:6.1+'
+        compile files('libs/gcm.jar')
+        compile files('libs/httpclient-android-4.3.5.jar')
+          compile 'com.android.support:appcompat-v7:21.0.0'
+    }
+    
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        }
+        compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    }
+    
